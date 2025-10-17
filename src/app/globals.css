@@ -1,26 +1,404 @@
 @import "tailwindcss";
 
+@theme {
+  /* Sales OS Design System - Theme Configuration */
+  --font-family-roobert: 'Roobert', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  --font-family-sans: 'Roobert', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+
+  --font-size-xxs: 10px;
+  --line-height-xxs: 12px;
+
+  --radius: 0.5rem;
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+
+  /* Sales OS Colors */
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  --color-primary-dark: hsl(var(--primary-dark));
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  --color-chart-1: hsl(var(--chart-1));
+  --color-chart-2: hsl(var(--chart-2));
+  --color-chart-3: hsl(var(--chart-3));
+  --color-chart-4: hsl(var(--chart-4));
+  --color-chart-5: hsl(var(--chart-5));
+
+  /* Animation Durations */
+  --animate-accordion-down: accordion-down 0.2s ease-out;
+  --animate-accordion-up: accordion-up 0.2s ease-out;
+  --animate-spotlight: spotlight 2s ease .75s 1 forwards;
+  --animate-scroll: scroll var(--animation-duration, 40s) var(--animation-direction, forwards) linear infinite;
+  --animate-bounce: bounce 1s infinite;
+  --animate-fade-in-up: fadeInUp 0.5s ease-out;
+  --animate-shiny-text: shiny-text 3s linear infinite;
+  --animate-expand-width: expandWidth 0.3s ease-out;
+  --animate-fade-in: fadeIn 0.5s ease-out;
+}
+
+/* Sales OS Design System - Font Face Declarations */
+/* 
+Note: Roobert font files need to be added to src/assets/fonts/ directory
+Uncomment and update paths when font files are available:
+
+@font-face {
+  font-family: 'Roobert';
+  src: url('../assets/fonts/roobert-400.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Roobert';
+  src: url('../assets/fonts/roobert-500.otf') format('opentype');
+  font-weight: 500;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Roobert';
+  src: url('../assets/fonts/roobert-600.otf') format('opentype');
+  font-weight: 600;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Roobert';
+  src: url('../assets/fonts/roobert-700.otf') format('opentype');
+  font-weight: 700;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'Roobert';
+  src: url('../assets/fonts/roobert-800.otf') format('opentype');
+  font-weight: 800;
+  font-style: normal;
+}
+*/
+
+/* Sales OS Design System - Light Theme Colors */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* Background & Foreground */
+  --background: 0 0% 98%;
+  /* #FAFAFA */
+  --foreground: 246 28% 7%;
+  /* #0E0D17 */
+
+  /* Card Colors */
+  --card: 0 0% 100%;
+  /* #FFFFFF */
+  --card-foreground: 240 10% 3.9%;
+  /* #090A0C */
+
+  /* Popover Colors */
+  --popover: 0 0% 100%;
+  /* #FFFFFF */
+  --popover-foreground: 240 10% 3.9%;
+  /* #090A0C */
+
+  /* Primary Colors */
+  --primary: 254 95% 60%;
+  /* #6337FA */
+  --primary-foreground: 0 0% 98%;
+  /* #FAFAFA */
+  --primary-dark: 256 55% 23%;
+  /* #2C1B5C */
+
+  /* Secondary Colors */
+  --secondary: 255 60% 37%;
+  /* #422698 */
+  --secondary-foreground: 0 0% 98%;
+  /* #FAFAFA */
+
+  /* Muted Colors */
+  --muted: 240 4.8% 95.9%;
+  /* #F4F3F9 */
+  --muted-foreground: 240 3.8% 46.1%;
+  /* #757185 */
+
+  /* Accent Colors */
+  --accent: 264 100% 71%;
+  /* #A86DFF */
+  --accent-foreground: 240 5.9% 10%;
+  /* #090A0C */
+
+  /* Destructive Colors */
+  --destructive: 0 84.2% 60.2%;
+  /* #E93D3D */
+  --destructive-foreground: 0 0% 98%;
+  /* #FAFAFA */
+
+  /* Border & Input */
+  --border: 240 5.9% 90%;
+  /* #E6E5EB */
+  --input: 240 5.9% 90%;
+  /* #E6E5EB */
+  --ring: 240 10% 3.9%;
+  /* #090A0C */
+
+  /* Chart Colors */
+  --chart-1: 12 76% 61%;
+  /* #E85D45 */
+  --chart-2: 173 58% 39%;
+  /* #2F9E98 */
+  --chart-3: 197 37% 24%;
+  /* #264B57 */
+  --chart-4: 43 74% 66%;
+  /* #EBC244 */
+  --chart-5: 27 87% 67%;
+  /* #F87F3B */
+
+  /* Sidebar Colors */
+  --sidebar-background: 0 0% 98%;
+  --sidebar-foreground: 240 5.3% 26.1%;
+  --sidebar-primary: 240 5.9% 10%;
+  --sidebar-primary-foreground: 0 0% 98%;
+  --sidebar-accent: 240 4.8% 95.9%;
+  --sidebar-accent-foreground: 240 5.9% 10%;
+  --sidebar-border: 220 13% 91%;
+  --sidebar-ring: 217.2 91.2% 59.8%;
+
+  /* Border Radius */
+  --radius: 0.5rem;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
+
+/* Sales OS Design System - Dark Theme Colors */
+.dark {
+  /* Background & Foreground */
+  --background: 246 28% 7%;
+  /* #0E0D17 */
+  --foreground: 0 0% 98%;
+  /* #FAFAFA */
+
+  /* Card Colors */
+  --card: 240 10% 3.9%;
+  /* #090A12 */
+  --card-foreground: 0 0% 98%;
+  /* #FAFAFA */
+
+  /* Popover Colors */
+  --popover: 240 10% 3.9%;
+  /* #090A12 */
+  --popover-foreground: 0 0% 98%;
+  /* #FAFAFA */
+
+  /* Primary Colors (same as light) */
+  --primary: 254 95% 60%;
+  /* #6337FA */
+  --primary-foreground: 0 0% 98%;
+  /* #FAFAFA */
+  --primary-dark: 256 55% 23%;
+  /* #2C1B5C */
+
+  /* Secondary Colors */
+  --secondary: 255 60% 37%;
+  /* #422698 */
+  --secondary-foreground: 0 0% 98%;
+  /* #FAFAFA */
+
+  /* Muted Colors */
+  --muted: 240 3.7% 15.9%;
+  /* #282631 */
+  --muted-foreground: 240 5% 64.9%;
+  /* #A3A1B0 */
+
+  /* Accent Colors */
+  --accent: 240 3.7% 15.9%;
+  /* #282631 */
+  --accent-foreground: 0 0% 98%;
+  /* #FAFAFA */
+
+  /* Destructive Colors */
+  --destructive: 0 62.8% 30.6%;
+  /* #7E1D1D */
+  --destructive-foreground: 0 0% 98%;
+  /* #FAFAFA */
+
+  /* Border & Input */
+  --border: 240 3.7% 15.9%;
+  /* #282631 */
+  --input: 240 3.7% 15.9%;
+  /* #282631 */
+  --ring: 240 4.9% 83.9%;
+  /* #D4D4D8 */
+
+  /* Chart Colors (Dark Theme) */
+  --chart-1: 220 70% 50%;
+  /* #3B7CD6 */
+  --chart-2: 160 60% 45%;
+  /* #39A785 */
+  --chart-3: 30 80% 55%;
+  /* #E69B3A */
+  --chart-4: 280 65% 60%;
+  /* #9F5DC8 */
+  --chart-5: 340 75% 55%;
+  /* #E14B89 */
+
+  /* Sidebar Colors (Dark) */
+  --sidebar-background: 240 5.9% 10%;
+  --sidebar-foreground: 240 4.8% 95.9%;
+  --sidebar-primary: 224.3 76.3% 48%;
+  --sidebar-primary-foreground: 0 0% 100%;
+  --sidebar-accent: 240 3.7% 15.9%;
+  --sidebar-accent-foreground: 240 4.8% 95.9%;
+  --sidebar-border: 240 3.7% 15.9%;
+  --sidebar-ring: 217.2 91.2% 59.8%;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+/* Sales OS Design System - Custom Animations */
+@keyframes accordion-down {
+  from {
+    height: 0
+  }
+
+  to {
+    height: var(--radix-accordion-content-height)
   }
 }
 
+@keyframes accordion-up {
+  from {
+    height: var(--radix-accordion-content-height)
+  }
+
+  to {
+    height: 0
+  }
+}
+
+@keyframes spotlight {
+  0% {
+    opacity: 0;
+    transform: translate(-72%, -62%) scale(0.5);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translate(-50%, -40%) scale(1);
+  }
+}
+
+@keyframes scroll {
+  to {
+    transform: translate(calc(-50% - 1rem));
+  }
+}
+
+@keyframes bounce {
+
+  0%,
+  80%,
+  100% {
+    transform: translateY(0);
+  }
+
+  40% {
+    transform: translateY(-6px);
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shiny-text {
+  0% {
+    background-position: 200% 0;
+  }
+
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+@keyframes expandWidth {
+  from {
+    width: 0;
+    opacity: 0;
+  }
+
+  to {
+    width: 100%;
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Base Styles */
+* {
+  border-color: hsl(var(--border));
+}
+
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  font-family: 'Roobert', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+  font-feature-settings: "rlig" 1, "calt" 1;
+}
+
+/* Custom Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 4px;
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c5c5c5;
+  border-radius: 5px;
+}
+
+/* Shiny Text Effect */
+.animate-shiny-text {
+  background: linear-gradient(90deg,
+      transparent,
+      rgba(0, 0, 0, 0.8),
+      transparent);
+  background-size: 200% 100%;
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  animation: shiny-text 3s linear infinite;
+}
+
+/* Custom Utilities */
+.overflow-wrap-anywhere {
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
