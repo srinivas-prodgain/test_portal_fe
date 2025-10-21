@@ -18,7 +18,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { useCreateCandidateMutation } from "@/lib/queries";
+import { useCreateCandidate } from "@/hooks/api";
 import type { TCandidatePayload } from "@/types/exam";
 
 const candidate_form_schema = z.object({
@@ -37,7 +37,7 @@ const default_form_values: TCandidatePayload = {
 
 export default function CandidateIntakePage() {
   const router = useRouter();
-  const { mutateAsync: create_candidate, isPending } = useCreateCandidateMutation();
+  const { mutateAsync: create_candidate, isPending } = useCreateCandidate();
 
   const [form_values, set_form_values] = useState<TCandidatePayload>(default_form_values);
   const [error_message, set_error_message] = useState<string>("");

@@ -27,11 +27,11 @@ import { useDisableCopyPaste } from "@/hooks/use-disable-copy-paste";
 import { useDevtoolsGuard } from "@/hooks/use-devtools-guard";
 import { useFullscreenGuard } from "@/hooks/use-fullscreen-guard";
 import {
-  useCreateAttemptMutation,
-  useQuestionsQuery,
-  useSubmitAttemptMutation,
-  useRegisterEventMutation,
-} from "@/lib/queries";
+  useCreateAttempt,
+  useGetQuestions,
+  useSubmitAttempt,
+  useRegisterEvent,
+} from "@/hooks/api";
 import type { TAttemptResponse, TQuestion, TViolationType } from "@/types/exam";
 
 const ACTIVE_STATUS_LABEL = "Attempt in progress";
@@ -52,9 +52,9 @@ export const ExamPageContent = () => {
   const searchParams = useSearchParams();
   const candidateId = searchParams.get("candidate_id");
 
-  const createAttemptMutation = useCreateAttemptMutation();
-  const submitAttemptMutation = useSubmitAttemptMutation();
-  const registerEventMutation = useRegisterEventMutation();
+  const createAttemptMutation = useCreateAttempt();
+  const submitAttemptMutation = useSubmitAttempt();
+  const registerEventMutation = useRegisterEvent();
 
   const [attemptInfo, setAttemptInfo] = useState<TAttemptResponse | null>(null);
   const [attemptStatus, setAttemptStatus] = useState<"running" | "submitted">("running");
@@ -72,7 +72,7 @@ export const ExamPageContent = () => {
   const attemptInfoRef = useRef<TAttemptResponse | null>(null);
   const attemptStatusRef = useRef<"running" | "submitted">("running");
 
-  const questionsQuery = useQuestionsQuery({ enabled: Boolean(candidateId) });
+  const questionsQuery = useGetQuestions({ enabled: Boolean(candidateId) });
   const questions = useMemo(() => questionsQuery.data ?? [], [questionsQuery.data]);
 
   const isAttemptActive = attemptStatus === "running";
