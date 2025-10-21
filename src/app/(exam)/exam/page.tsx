@@ -1,491 +1,519 @@
-"use client";
+'use client'
 
-import { Suspense, useEffect, useMemo, useRef, useState } from "react";
-import type { JSX } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import {
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState
+} from 'react'
+import { useRouter, useSearchParams } from 'next/navigation'
 
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Textarea } from "@/components/ui/textarea";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { useDisableCopyPaste } from "@/hooks/use-disable-copy-paste";
-import { useDevtoolsGuard } from "@/hooks/use-devtools-guard";
-import { useFullscreenGuard } from "@/hooks/use-fullscreen-guard";
+import { isAxiosError } from 'axios'
+
+import type { TAttemptResponse, TQuestion, TViolationType } from '@/types/exam'
 import {
   useCreateAttempt,
+  useGetAttempt,
   useGetQuestions,
-  useSubmitAttempt,
   useRegisterEvent,
-} from "@/hooks/api";
-import type { TAttemptResponse, TQuestion, TViolationType } from "@/types/exam";
+  useSubmitAttempt
+} from '@/hooks/api'
+import { useDevtoolsGuard } from '@/hooks/use-devtools-guard'
+import { useDisableCopyPaste } from '@/hooks/use-disable-copy-paste'
+import { useFullscreenGuard } from '@/hooks/use-fullscreen-guard'
 
-const ACTIVE_STATUS_LABEL = "Attempt in progress";
+import {
+  ACTIVE_STATUS_LABEL,
+  AUTO_SUBMIT_BUFFER_MS,
+  formatTimeRemaining
+} from '@/constants/exam'
 
-const formatTimeRemaining = ({ milliseconds }: { milliseconds: number }): string => {
-  const totalSeconds = Math.max(0, Math.floor(milliseconds / 1000));
-  const minutes = Math.floor(totalSeconds / 60)
-    .toString()
-    .padStart(2, "0");
-  const seconds = (totalSeconds % 60).toString().padStart(2, "0");
-
-  return `${minutes}:${seconds}`;
-};
-
+import {
+  AttemptErrorState,
+  AttemptLoadingState,
+  ExamLayout,
+  MissingCandidateNotice
+} from './components'
 
 export const ExamPageContent = () => {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const candidateId = searchParams.get("candidate_id");
+  const router = useRouter()
+  const searchParams = useSearchParams()
+  const candidateId = searchParams.get('candidate_id')
 
-  const createAttemptMutation = useCreateAttempt();
-  const submitAttemptMutation = useSubmitAttempt();
-  const registerEventMutation = useRegisterEvent();
+  const { mutateAsync: createAttempt, isPending: isCreatingAttempt } =
+    useCreateAttempt()
+  const attemptQuery = useGetAttempt(
+    { candidate_id: candidateId ?? '' },
+    { enabled: Boolean(candidateId) }
+  )
+  const { mutateAsync: submitAttempt, isPending: isSubmitPending } =
+    useSubmitAttempt()
+  const { mutateAsync: registerEvent } = useRegisterEvent()
 
-  const [attemptInfo, setAttemptInfo] = useState<TAttemptResponse | null>(null);
-  const [attemptStatus, setAttemptStatus] = useState<"running" | "submitted">("running");
-  const [answers, setAnswers] = useState<Record<string, string>>({});
-  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
-  const [attemptError, setAttemptError] = useState("");
-  const [timeRemaining, setTimeRemaining] = useState(0);
-  const [showWarningDialog, setShowWarningDialog] = useState(false);
-  const [isProcessingViolation, setIsProcessingViolation] = useState(false);
+  const [attemptInfo, setAttemptInfo] = useState<TAttemptResponse | null>(null)
+  const [attemptStatus, setAttemptStatus] = useState<'running' | 'submitted'>(
+    'running'
+  )
+  const [answers, setAnswers] = useState<Record<string, string>>({})
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
+  const [attemptError, setAttemptError] = useState('')
+  const [timeRemaining, setTimeRemaining] = useState(0)
+  const [showWarningDialog, setShowWarningDialog] = useState(false)
+  const [isProcessingViolation, setIsProcessingViolation] = useState(false)
 
-  const timerFrameRef = useRef<number>(0);
-  const attemptRequestedRef = useRef(false);
-  const answersRef = useRef<Record<string, string>>({});
-  const questionsRef = useRef<TQuestion[]>([]);
-  const attemptInfoRef = useRef<TAttemptResponse | null>(null);
-  const attemptStatusRef = useRef<"running" | "submitted">("running");
+  const timerFrameRef = useRef<number>(0)
+  const timerEndRef = useRef<string | null>(null)
+  const handleSubmitAttemptRef = useRef<() => Promise<void>>(() =>
+    Promise.resolve()
+  )
+  const attemptRequestedRef = useRef(false)
+  const answersRef = useRef<Record<string, string>>({})
+  const questionsRef = useRef<TQuestion[]>([])
+  const attemptInfoRef = useRef<TAttemptResponse | null>(null)
+  const attemptStatusRef = useRef<'running' | 'submitted'>('running')
 
-  const questionsQuery = useGetQuestions({ enabled: Boolean(candidateId) });
-  const questions = useMemo(() => questionsQuery.data ?? [], [questionsQuery.data]);
+  const questionsQuery = useGetQuestions({ enabled: Boolean(candidateId) })
+  const questions = useMemo(
+    () => questionsQuery.data ?? [],
+    [questionsQuery.data]
+  )
 
-  const isAttemptActive = attemptStatus === "running";
-  const currentQuestion = questions[currentQuestionIndex];
-  const currentAnswer = currentQuestion ? answers[currentQuestion.id] ?? "" : "";
-  const timeRemainingLabel = formatTimeRemaining({ milliseconds: timeRemaining });
+  const isAttemptActive = attemptStatus === 'running'
+  const currentQuestion = questions[currentQuestionIndex]
+  const currentAnswer = currentQuestion
+    ? (answers[currentQuestion.id] ?? '')
+    : ''
+  const timeRemainingLabel = formatTimeRemaining({
+    milliseconds: timeRemaining
+  })
 
   useEffect(() => {
-    answersRef.current = answers;
-  }, [answers]);
+    questionsRef.current = questions
+    attemptStatusRef.current = attemptStatus
+    attemptInfoRef.current = attemptInfo
+    answersRef.current = answers
+  }, [questions, answers, attemptInfo, attemptStatus])
 
-  useEffect(() => {
-    questionsRef.current = questions;
-  }, [questions]);
-
-  useEffect(() => {
-    attemptInfoRef.current = attemptInfo;
-  }, [attemptInfo]);
-
-  useEffect(() => {
-    attemptStatusRef.current = attemptStatus;
-  }, [attemptStatus]);
-
-  useDisableCopyPaste({ is_active: isAttemptActive });
-  useDevtoolsGuard({ is_active: isAttemptActive });
+  useDisableCopyPaste({ is_active: isAttemptActive })
+  useDevtoolsGuard({ is_active: isAttemptActive })
 
   const { request_fullscreen: requestFullscreen } = useFullscreenGuard({
-    is_active: isAttemptActive,
-  });
+    is_active: isAttemptActive
+  })
 
   useEffect(() => {
     if (attemptInfo && isAttemptActive) {
-      void requestFullscreen();
+      void requestFullscreen()
     }
-  }, [attemptInfo, isAttemptActive, requestFullscreen]);
+  }, [attemptInfo, isAttemptActive, requestFullscreen])
 
-  const handleSubmitAttempt = async (): Promise<void> => {
-    const attemptId = attemptInfoRef.current?.attempt_id;
-
-    if (!attemptId || attemptStatusRef.current !== "running") {
-      console.log("Cannot submit:", { attemptId, status: attemptStatusRef.current });
-      return;
+  const startTimer = useCallback((endsAt: string) => {
+    if (timerFrameRef.current) {
+      cancelAnimationFrame(timerFrameRef.current)
     }
 
-    console.log("Submitting attempt...");
+    timerEndRef.current = endsAt
+    const endTime = new Date(endsAt).getTime()
+
+    const tick = (): void => {
+      const remaining = Math.max(endTime - Date.now(), 0)
+      setTimeRemaining(remaining)
+
+      if (remaining > AUTO_SUBMIT_BUFFER_MS) {
+        timerFrameRef.current = requestAnimationFrame(tick)
+        return
+      }
+
+      if (timerFrameRef.current) {
+        cancelAnimationFrame(timerFrameRef.current)
+        timerFrameRef.current = 0
+      }
+
+      void handleSubmitAttemptRef.current()
+      console.log('auto submit triggered')
+    }
+
+    tick()
+  }, [])
+
+  const handleSubmitAttempt = useCallback(async (): Promise<void> => {
+    const attemptId = attemptInfoRef.current?.attempt_id
+    const attemptEndsAt = attemptInfoRef.current?.endsAt
+
+    if (
+      !attemptId ||
+      attemptStatusRef.current !== 'running' ||
+      isSubmitPending
+    ) {
+      console.log('Cannot submit:', {
+        attemptId,
+        status: attemptStatusRef.current
+      })
+      return
+    }
+
+    console.log('Submitting attempt...')
+    if (timerFrameRef.current) {
+      cancelAnimationFrame(timerFrameRef.current)
+      timerFrameRef.current = 0
+    }
+    timerEndRef.current = null
 
     const payload = questionsRef.current.map((question) => ({
       questionID: question.id,
-      answers: answersRef.current[question.id] ?? "",
-    }));
+      answers: answersRef.current[question.id] ?? ''
+    }))
 
     try {
-      await submitAttemptMutation.mutateAsync({
+      await submitAttempt({
         attempt_id: attemptId,
-        answers: payload,
-      });
+        answers: payload
+      })
 
-      setAttemptStatus("submitted");
-      router.replace(`/submit?status=submitted`);
+      setAttemptStatus('submitted')
+      router.replace(`/submit?status=submitted`)
     } catch (error) {
-      console.error("Submission failed:", error);
+      console.error('Submission failed:', error)
+      if (attemptStatusRef.current === 'running' && attemptEndsAt) {
+        const remaining = new Date(attemptEndsAt).getTime() - Date.now()
+        if (remaining > 0) {
+          startTimer(attemptEndsAt)
+        }
+      }
     }
-  };
+  }, [isSubmitPending, router, startTimer, submitAttempt])
+
+  useEffect(() => {
+    handleSubmitAttemptRef.current = handleSubmitAttempt
+  }, [handleSubmitAttempt])
 
   const handleViolation = async (type: TViolationType): Promise<void> => {
-    const attemptId = attemptInfoRef.current?.attempt_id;
+    const attemptId = attemptInfoRef.current?.attempt_id
 
-    if (!attemptId || attemptStatusRef.current !== "running" || isProcessingViolation) {
-      return;
+    if (
+      !attemptId ||
+      attemptStatusRef.current !== 'running' ||
+      isProcessingViolation
+    ) {
+      return
     }
 
     // Prevent multiple simultaneous violations
-    setIsProcessingViolation(true);
+    setIsProcessingViolation(true)
 
     const payload = questionsRef.current.map((question) => ({
       questionID: question.id,
-      answers: answersRef.current[question.id] ?? "",
-    }));
+      answers: answersRef.current[question.id] ?? ''
+    }))
 
     try {
-      const response = await registerEventMutation.mutateAsync({
+      const response = await registerEvent({
         attempt_id: attemptId,
         type,
-        answers: payload,
-      });
+        answers: payload
+      })
 
-      if (response.action === "warn") {
+      if (response.action === 'warn') {
         // First violation - show warning
-        setShowWarningDialog(true);
-      } else if (response.action === "terminate") {
+        setShowWarningDialog(true)
+      } else if (response.action === 'terminate') {
         // Second violation or time expired - terminate exam
-        setAttemptStatus("submitted");
-        router.replace(`/submit?status=terminated`);
+        if (timerFrameRef.current) {
+          cancelAnimationFrame(timerFrameRef.current)
+          timerFrameRef.current = 0
+        }
+        timerEndRef.current = null
+        setAttemptStatus('submitted')
+        router.replace(`/submit?status=terminated`)
       }
     } catch (error) {
-      console.error("Failed to register violation:", error);
+      console.error('Failed to register violation:', error)
     } finally {
       // Reset after a delay to prevent rapid repeated violations
       setTimeout(() => {
-        setIsProcessingViolation(false);
-      }, 1000);
+        setIsProcessingViolation(false)
+      }, 1000)
     }
-  };
+  }
 
   const handleWarningAcknowledge = async (): Promise<void> => {
-    setShowWarningDialog(false);
+    setShowWarningDialog(false)
     // Re-request fullscreen after user acknowledges warning
-    await requestFullscreen();
-  };
+    await requestFullscreen()
+  }
 
-  const startTimer = (endsAt: string) => {
-    const endTime = new Date(endsAt).getTime();
-    // Submit 500ms before actual expiry to account for network delay
-    const AUTO_SUBMIT_BUFFER_MS = 500;
+  useEffect(() => {
+    const existingAttempt = attemptQuery.data
 
-    const tick = (): void => {
-      const remaining = Math.max(endTime - Date.now(), 0);
-      setTimeRemaining(remaining);
+    if (!existingAttempt) {
+      return
+    }
 
-      if (remaining > AUTO_SUBMIT_BUFFER_MS) {
-        timerFrameRef.current = requestAnimationFrame(tick);
-      } else if (remaining <= AUTO_SUBMIT_BUFFER_MS && remaining > 0) {
-        // Auto submit when we hit the buffer threshold
-        handleSubmitAttempt();
-        console.log("auto submit triggered");
+    setAttemptInfo(existingAttempt)
+    setAttemptError('')
+
+    if (existingAttempt.answers?.length) {
+      setAnswers((previous) => {
+        let hasChanges = false
+        const next = { ...previous }
+
+        existingAttempt.answers.forEach(({ questionID, answers }) => {
+          if (next[questionID] !== answers) {
+            next[questionID] = answers
+            hasChanges = true
+          }
+        })
+
+        return hasChanges ? next : previous
+      })
+    }
+
+    if (existingAttempt.status === 'running') {
+      if (attemptStatusRef.current === 'submitted') {
+        return
       }
-    };
 
-    tick();
-  };
+      if (attemptStatusRef.current !== 'running') {
+        setAttemptStatus('running')
+      }
+
+      if (timerEndRef.current !== existingAttempt.endsAt) {
+        startTimer(existingAttempt.endsAt)
+      }
+
+      return
+    }
+
+    if (attemptStatusRef.current !== 'submitted') {
+      setAttemptStatus('submitted')
+    }
+
+    if (timerFrameRef.current) {
+      cancelAnimationFrame(timerFrameRef.current)
+      timerFrameRef.current = 0
+    }
+    timerEndRef.current = null
+    setTimeRemaining(0)
+
+    if (existingAttempt.status) {
+      router.replace(`/submit?status=${existingAttempt.status}`)
+    }
+  }, [attemptQuery.data, router, startTimer])
 
   // Listen for violations
   useEffect(() => {
-    if (!isAttemptActive) return;
+    if (!isAttemptActive) return
 
     const handleVisibilityChange = () => {
       if (document.hidden) {
-        handleViolation("window-blur");
+        handleViolation('window-blur')
       }
-    };
+    }
 
     const handleBlur = () => {
-      handleViolation("window-blur");
-    };
+      handleViolation('window-blur')
+    }
 
     const handleFullscreenChange = () => {
       if (!document.fullscreenElement) {
-        handleViolation("fullscreen-exit");
+        handleViolation('fullscreen-exit')
       }
-    };
+    }
 
     const handleCopy = (e: ClipboardEvent) => {
-      e.preventDefault();
-      handleViolation("copy-attempt");
-    };
+      e.preventDefault()
+      handleViolation('copy-attempt')
+    }
 
     const handlePaste = (e: ClipboardEvent) => {
-      e.preventDefault();
-      handleViolation("paste-attempt");
-    };
+      e.preventDefault()
+      handleViolation('paste-attempt')
+    }
 
     const handleContextMenu = (e: MouseEvent) => {
-      e.preventDefault();
-    };
+      e.preventDefault()
+    }
 
-    document.addEventListener("visibilitychange", handleVisibilityChange);
-    window.addEventListener("blur", handleBlur);
-    document.addEventListener("fullscreenchange", handleFullscreenChange);
-    document.addEventListener("copy", handleCopy);
-    document.addEventListener("paste", handlePaste);
-    document.addEventListener("contextmenu", handleContextMenu);
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    window.addEventListener('blur', handleBlur)
+    document.addEventListener('fullscreenchange', handleFullscreenChange)
+    document.addEventListener('copy', handleCopy)
+    document.addEventListener('paste', handlePaste)
+    document.addEventListener('contextmenu', handleContextMenu)
 
     return () => {
-      document.removeEventListener("visibilitychange", handleVisibilityChange);
-      window.removeEventListener("blur", handleBlur);
-      document.removeEventListener("fullscreenchange", handleFullscreenChange);
-      document.removeEventListener("copy", handleCopy);
-      document.removeEventListener("paste", handlePaste);
-      document.removeEventListener("contextmenu", handleContextMenu);
-    };
-  }, [isAttemptActive, isProcessingViolation]);
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+      window.removeEventListener('blur', handleBlur)
+      document.removeEventListener('fullscreenchange', handleFullscreenChange)
+      document.removeEventListener('copy', handleCopy)
+      document.removeEventListener('paste', handlePaste)
+      document.removeEventListener('contextmenu', handleContextMenu)
+    }
+  }, [isAttemptActive, isProcessingViolation])
 
   useEffect(() => {
     return () => {
       if (timerFrameRef.current) {
-        cancelAnimationFrame(timerFrameRef.current);
+        cancelAnimationFrame(timerFrameRef.current)
+        timerFrameRef.current = 0
       }
-    };
-  }, []);
+      timerEndRef.current = null
+    }
+  }, [])
 
   useEffect(() => {
-    if (!candidateId || attemptRequestedRef.current) {
-      return;
+    if (
+      !candidateId ||
+      attemptRequestedRef.current ||
+      attemptQuery.isLoading ||
+      attemptQuery.isFetching ||
+      attemptQuery.isSuccess
+    ) {
+      return
     }
 
-    attemptRequestedRef.current = true;
+    const error = attemptQuery.error
 
-    createAttemptMutation
-      .mutateAsync(candidateId)
-      .then((response: TAttemptResponse) => {
-        setAttemptInfo(response);
-        setAttemptStatus("running");
-        setAttemptError("");
-        startTimer(response.endsAt);
-      })
-      .catch(() => {
-        setAttemptError("Unable to create exam attempt. Please refresh and try again.");
-      });
-  }, [candidateId, createAttemptMutation, startTimer]);
+    if (isAxiosError(error) && error.response?.status === 404) {
+      attemptRequestedRef.current = true
+
+      createAttempt(candidateId)
+        .then((response: TAttemptResponse) => {
+          setAttemptInfo(response)
+          setAttemptStatus('running')
+          setAttemptError('')
+          startTimer(response.endsAt)
+        })
+        .catch(() => {
+          attemptRequestedRef.current = false
+          setAttemptError(
+            'Unable to create exam attempt. Please refresh and try again.'
+          )
+        })
+
+      return
+    }
+
+    setAttemptError(
+      'Unable to load exam attempt. Please refresh and try again.'
+    )
+  }, [
+    attemptQuery.error,
+    attemptQuery.isFetching,
+    attemptQuery.isLoading,
+    attemptQuery.isSuccess,
+    candidateId,
+    createAttempt,
+    startTimer
+  ])
 
   useEffect(() => {
     if (!questions.length) {
-      return;
+      return
     }
 
     setAnswers((previous) => {
-      const next = { ...previous };
+      let hasChanges = false
+      const next = { ...previous }
 
       questions.forEach((question) => {
         if (next[question.id] === undefined) {
-          next[question.id] = "";
+          next[question.id] = ''
+          hasChanges = true
         }
-      });
+      })
 
-      return next;
-    });
-  }, [questions]);
+      return hasChanges ? next : previous
+    })
+  }, [questions])
 
-  const handleAnswerChange = ({ value }: { value: string }): void => {
+  const handleAnswerChange = (value: string): void => {
     if (!currentQuestion || !isAttemptActive) {
-      return;
+      return
     }
 
     setAnswers((previous) => ({
       ...previous,
-      [currentQuestion.id]: value,
-    }));
-  };
+      [currentQuestion.id]: value
+    }))
+  }
 
-  const handleMove = ({ direction }: { direction: "next" | "previous" }): void => {
+  const handleMove = (direction: 'next' | 'previous'): void => {
     if (!currentQuestion || !isAttemptActive) {
-      return;
+      return
     }
 
     setCurrentQuestionIndex((previous) => {
-      if (direction === "next") {
-        return Math.min(previous + 1, Math.max(questions.length - 1, 0));
+      if (direction === 'next') {
+        return Math.min(previous + 1, Math.max(questions.length - 1, 0))
       }
 
-      return Math.max(previous - 1, 0);
-    });
-  };
+      return Math.max(previous - 1, 0)
+    })
+  }
 
   const handleFinishAttemptClick = async (): Promise<void> => {
     if (!isAttemptActive) {
-      return;
+      return
     }
 
-    await handleSubmitAttempt();
-  };
-
-  if (!candidateId) {
-    return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-background px-6 text-center">
-        <Card className="w-full max-w-lg">
-          <CardHeader>
-            <CardTitle>Candidate information missing</CardTitle>
-            <CardDescription>Return to the intake form to begin your attempt.</CardDescription>
-          </CardHeader>
-          <CardFooter className="justify-center">
-            <Button onClick={() => router.push("/form1")}>Go to Intake Form</Button>
-          </CardFooter>
-        </Card>
-      </div>
-    );
+    await handleSubmitAttempt()
   }
 
-  const statusLabel = attemptStatus === "running" ? ACTIVE_STATUS_LABEL : "Attempt submitted";
+  const isAttemptLoading =
+    Boolean(candidateId) &&
+    (attemptQuery.isLoading || attemptQuery.isPending || isCreatingAttempt)
+  const isQuestionsLoading = Boolean(candidateId) && questionsQuery.isLoading
+  const shouldShowLoadingState =
+    !attemptError &&
+    Boolean(candidateId) &&
+    (!attemptInfo || isAttemptLoading || isQuestionsLoading)
+
+  if (!candidateId) {
+    return <MissingCandidateNotice onNavigate={() => router.push('/form1')} />
+  }
+
+  if (attemptError && !attemptInfo) {
+    return <AttemptErrorState message={attemptError} />
+  }
+
+  if (shouldShowLoadingState) {
+    return <AttemptLoadingState />
+  }
+
+  const statusLabel =
+    attemptStatus === 'running' ? ACTIVE_STATUS_LABEL : 'Attempt submitted'
 
   return (
-    <div className="flex min-h-screen flex-col bg-background">
-      <div className="mx-auto w-full max-w-5xl flex-1 px-4 py-8 sm:px-6 lg:px-8">
-        <header className="mb-6 flex flex-col gap-4 rounded-lg border border-border bg-card px-6 py-5 shadow-sm sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <p className="text-sm font-medium text-muted-foreground">Time remaining</p>
-            <p className="text-3xl font-semibold text-foreground">{timeRemainingLabel}</p>
-          </div>
-          <div className="text-right">
-            <p className="text-sm font-medium text-muted-foreground">Attempt status</p>
-            <p className="text-base font-semibold text-foreground">{statusLabel}</p>
-          </div>
-        </header>
-
-        <main className="flex flex-col gap-6">
-          {attemptError ? (
-            <Card className="border-red-200 bg-red-50">
-              <CardHeader>
-                <CardTitle className="text-destructive">Attempt Setup Failed</CardTitle>
-                <CardDescription className="text-destructive">{attemptError}</CardDescription>
-              </CardHeader>
-            </Card>
-          ) : null}
-
-          {questionsQuery.isError ? (
-            <Card className="border-red-200 bg-red-50">
-              <CardHeader>
-                <CardTitle className="text-destructive">Failed to Load Questions</CardTitle>
-                <CardDescription className="text-destructive">
-                  Unable to fetch exam questions. Please refresh and try again.
-                </CardDescription>
-              </CardHeader>
-            </Card>
-          ) : null}
-
-          <section className="flex justify-center">
-            <Card className="flex h-[75vh] w-full max-w-4xl flex-col">
-              <CardHeader className="flex flex-col gap-2">
-                <CardDescription>
-                  Question {currentQuestionIndex + 1} of {questions.length || 1}
-                </CardDescription>
-                <CardTitle>{currentQuestion?.question ?? "Loading question..."}</CardTitle>
-              </CardHeader>
-              <CardContent className="flex-1">
-                <Textarea
-                  value={currentAnswer}
-                  onChange={(event) => handleAnswerChange({ value: event.target.value })}
-                  placeholder="Type your response here"
-                  className="h-full min-h-[240px]"
-                  disabled={!isAttemptActive}
-                />
-              </CardContent>
-              <CardFooter className="justify-between">
-                <div className="flex gap-3">
-                  <Button
-                    variant="outline"
-                    onClick={() => handleMove({ direction: "previous" })}
-                    disabled={currentQuestionIndex === 0 || !isAttemptActive}
-                    className="border-border bg-card text-card-foreground hover:bg-accent hover:text-accent-foreground"
-                  >
-                    Previous
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => handleMove({ direction: "next" })}
-                    disabled={currentQuestionIndex >= questions.length - 1 || !isAttemptActive}
-                    className="border-border bg-card text-card-foreground hover:bg-accent hover:text-accent-foreground"
-                  >
-                    Next
-                  </Button>
-                </div>
-                <Button
-                  onClick={handleFinishAttemptClick}
-                  disabled={submitAttemptMutation.isPending || !isAttemptActive}
-                >
-                  {submitAttemptMutation.isPending ? "Saving..." : "Finish Attempt"}
-                </Button>
-              </CardFooter>
-            </Card>
-          </section>
-        </main>
-      </div>
-
-      {/* Warning Dialog */}
-      <AlertDialog open={showWarningDialog} onOpenChange={setShowWarningDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>⚠️ Violation Warning</AlertDialogTitle>
-            <AlertDialogDescription className="space-y-2">
-              <p className="font-semibold text-destructive">
-                You have violated the exam rules!
-              </p>
-              <p>
-                This is your first and only warning. Violations include:
-              </p>
-              <ul className="list-disc pl-5 space-y-1">
-                <li>Switching tabs or windows</li>
-                <li>Exiting fullscreen mode</li>
-                <li>Attempting to copy or paste</li>
-                <li>Opening developer tools</li>
-              </ul>
-              <p className="font-semibold mt-4">
-                If you commit another violation, your exam will be automatically terminated.
-              </p>
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogAction onClick={handleWarningAcknowledge}>
-              I Understand
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </div>
-  );
-};
+    <ExamLayout
+      statusLabel={statusLabel}
+      timeRemainingLabel={timeRemainingLabel}
+      attemptError={attemptError}
+      hasQuestionsError={questionsQuery.isError}
+      currentQuestionIndex={currentQuestionIndex}
+      questionsCount={questions.length}
+      currentQuestion={currentQuestion}
+      currentAnswer={currentAnswer}
+      isAttemptActive={isAttemptActive}
+      isSubmitPending={isSubmitPending}
+      onAnswerChange={handleAnswerChange}
+      onMove={handleMove}
+      onFinish={handleFinishAttemptClick}
+      showWarningDialog={showWarningDialog}
+      onWarningDialogChange={setShowWarningDialog}
+      onWarningAcknowledge={handleWarningAcknowledge}
+    />
+  )
+}
 
 export const ExamPage = () => {
   return (
-    <Suspense
-      fallback={
-        <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-background px-6 text-center">
-          <Card className="w-full max-w-lg">
-            <CardHeader>
-              <CardTitle>Loading exam...</CardTitle>
-              <CardDescription>Please wait while we prepare your exam.</CardDescription>
-            </CardHeader>
-          </Card>
-        </div>
-      }
-    >
+    <Suspense fallback={<AttemptLoadingState />}>
       <ExamPageContent />
     </Suspense>
-  );
-};
+  )
+}
 
-export default ExamPage;
+export default ExamPage

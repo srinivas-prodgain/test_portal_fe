@@ -1,89 +1,96 @@
-"use client";
+'use client'
 
-import type { ChangeEvent, FormEvent } from "react";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { z } from "zod";
-import { AxiosError } from "axios";
+import type { ChangeEvent, FormEvent } from 'react'
+import { useState } from 'react'
+import { useRouter } from 'next/navigation'
 
+import { AxiosError } from 'axios'
+import { z } from 'zod'
+
+import type { TCandidatePayload } from '@/types/exam'
+import { useCreateCandidate } from '@/hooks/api'
+
+import { Button } from '@/components/ui/button'
 import {
   Card,
   CardContent,
   CardDescription,
   CardFooter,
   CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Button } from "@/components/ui/button";
-import { Textarea } from "@/components/ui/textarea";
-import { useCreateCandidate } from "@/hooks/api";
-import type { TCandidatePayload } from "@/types/exam";
+  CardTitle
+} from '@/components/ui/card'
+import { Input } from '@/components/ui/input'
+import { Label } from '@/components/ui/label'
+import { Textarea } from '@/components/ui/textarea'
 
 const candidate_form_schema = z.object({
-  email: z.string().min(1, "Email is required"),
-  linkedin_profile_url: z.string().min(1, "LinkedIn profile is required"),
-  github_profile_url: z.string().min(1, "GitHub profile is required"),
-  resume: z.string().optional(),
-});
+  email: z.string().min(1, 'Email is required'),
+  linkedin_profile_url: z.string().min(1, 'LinkedIn profile is required'),
+  github_profile_url: z.string().min(1, 'GitHub profile is required'),
+  resume: z.string().optional()
+})
 
 const default_form_values: TCandidatePayload = {
-  email: "",
-  linkedin_profile_url: "",
-  github_profile_url: "",
-  resume: "",
-};
+  email: '',
+  linkedin_profile_url: '',
+  github_profile_url: '',
+  resume: ''
+}
 
 export default function CandidateIntakePage() {
-  const router = useRouter();
-  const { mutateAsync: create_candidate, isPending } = useCreateCandidate();
+  const router = useRouter()
+  const { mutateAsync: create_candidate, isPending } = useCreateCandidate()
 
-  const [form_values, set_form_values] = useState<TCandidatePayload>(default_form_values);
-  const [error_message, set_error_message] = useState<string>("");
+  const [form_values, set_form_values] =
+    useState<TCandidatePayload>(default_form_values)
+  const [error_message, set_error_message] = useState<string>('')
 
-  const handle_input_change = (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = event.target;
+  const handle_input_change = (
+    event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = event.target
 
     set_form_values((previous) => ({
       ...previous,
-      [name]: value,
-    }));
-  };
+      [name]: value
+    }))
+  }
 
   const handle_submit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    set_error_message("");
+    event.preventDefault()
+    set_error_message('')
 
     const parsed = candidate_form_schema.safeParse({
       ...form_values,
-      resume: form_values.resume ? form_values.resume : undefined,
-    });
+      resume: form_values.resume ? form_values.resume : undefined
+    })
 
     if (!parsed.success) {
-      set_error_message(parsed.error.errors[0]?.message ?? "Invalid input");
-      return;
+      set_error_message(parsed.error.errors[0]?.message ?? 'Invalid input')
+      return
     }
 
     try {
-      const response = await create_candidate(parsed.data);
-      router.replace(`/exam?candidate_id=${response.candidate_id}`);
+      const response = await create_candidate(parsed.data)
+      router.replace(`/exam?candidate_id=${response.candidate_id}`)
     } catch (error) {
       if (error instanceof AxiosError && error.response?.status === 409) {
-        set_error_message("Candidate already exists with provided details.");
-        return;
+        set_error_message('Candidate already exists with provided details.')
+        return
       }
 
-      set_error_message("Unable to submit candidate details. Please try again.");
+      set_error_message('Unable to submit candidate details. Please try again.')
     }
-  };
+  }
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-background px-4 py-12">
       <Card className="w-full max-w-2xl">
         <CardHeader>
           <CardTitle>Candidate Intake</CardTitle>
-          <CardDescription>Provide your contact details to begin the assessment.</CardDescription>
+          <CardDescription>
+            Provide your contact details to begin the assessment.
+          </CardDescription>
         </CardHeader>
         <form onSubmit={handle_submit}>
           <CardContent className="space-y-5">
@@ -128,7 +135,7 @@ export default function CandidateIntakePage() {
                 id="resume"
                 name="resume"
                 placeholder="Optional: share a link or storage ID for your resume"
-                value={form_values.resume ?? ""}
+                value={form_values.resume ?? ''}
                 onChange={handle_input_change}
               />
             </div>
@@ -139,12 +146,16 @@ export default function CandidateIntakePage() {
             ) : null}
           </CardContent>
           <CardFooter>
-            <Button type="submit" disabled={isPending} className="w-full sm:w-auto">
-              {isPending ? "Submitting..." : "Start Exam"}
+            <Button
+              type="submit"
+              disabled={isPending}
+              className="w-full sm:w-auto"
+            >
+              {isPending ? 'Submitting...' : 'Start Exam'}
             </Button>
           </CardFooter>
         </form>
       </Card>
     </div>
-  );
+  )
 }

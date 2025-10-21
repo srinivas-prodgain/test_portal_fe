@@ -1,16 +1,21 @@
-import { useMutation } from "@tanstack/react-query";
+import { useMutation } from '@tanstack/react-query'
 
-import { api_client } from "@/lib/api";
-import type { TCandidatePayload } from "@/types/exam";
+import type { TCandidatePayload } from '@/types/exam'
+import { api_client } from '@/lib/api'
 
-const candidates_endpoint = "/candidates";
+const candidates_endpoint = '/candidates'
 
-const post_candidate = async (payload: TCandidatePayload): Promise<{ candidate_id: string }> => {
-  const response = await api_client.post<{ candidate_id: string }>(candidates_endpoint, payload);
-  return response.data;
-};
+const post_candidate = async (
+  payload: TCandidatePayload
+): Promise<{ candidate_id: string }> => {
+  const response = await api_client.post<{ candidate_id: string }>(
+    candidates_endpoint,
+    payload
+  )
+  return response.data
+}
 
 export const useCreateCandidate = () =>
   useMutation({
-    mutationFn: post_candidate,
-  });
+    mutationFn: post_candidate
+  })

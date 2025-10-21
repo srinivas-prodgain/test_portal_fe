@@ -1,35 +1,35 @@
 export type TViolationType =
-  | "window-blur"
-  | "window-focus-change"
-  | "fullscreen-exit"
-  | "copy-attempt"
-  | "paste-attempt"
-  | "devtools-open";
+  | 'window-blur'
+  | 'window-focus-change'
+  | 'fullscreen-exit'
+  | 'copy-attempt'
+  | 'paste-attempt'
+  | 'devtools-open'
 
-export type TAttemptStatus = "running" | "submitted" | "terminated" | "expired";
+export type TAttemptStatus = 'running' | 'submitted' | 'terminated' | 'expired'
 
 export type TQuestion = {
-  id: string;
-  question: string;
-};
+  id: string
+  question: string
+}
 
 export type TAttemptTiming = {
-  startAt: string;
-  endsAt: string;
-};
+  startAt: string
+  endsAt: string
+}
 
 export type TAttemptResponse = TAttemptTiming & {
-  attempt_id: string;
-};
+  attempt_id: string
+}
 
 export type TCandidatePayload = {
-  email: string;
-  linkedin_profile_url: string;
-  github_profile_url: string;
-  resume?: string;
-};
+  email: string
+  linkedin_profile_url: string
+  github_profile_url: string
+  resume?: string
+}
 
 export type TSavedAnswerPayload = {
-  questionID: string;
-  answers: string;
-};
+  questionID: string
+  answers: string
+}
