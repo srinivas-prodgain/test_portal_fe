@@ -56,7 +56,7 @@ const post_violation_event = async (payload: {
   return response.data;
 };
 
-export const useQuestionsQuery = (enabled: boolean) =>
+export const useQuestionsQuery = ({ enabled }: { enabled: boolean }) =>
   useQuery({
     queryKey: questions_query_key,
     queryFn: fetch_questions,

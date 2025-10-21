@@ -1,6 +1,10 @@
 export type TViolationType =
   | "window-blur"
-  | "window-focus-change";
+  | "window-focus-change"
+  | "fullscreen-exit"
+  | "copy-attempt"
+  | "paste-attempt"
+  | "devtools-open";
 
 export type TAttemptStatus = "running" | "submitted" | "terminated" | "expired";
 

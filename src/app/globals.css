@@ -1,4 +1,7 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
 
 @theme {
   /* Sales OS Design System - Theme Configuration */
@@ -96,171 +99,172 @@ Uncomment and update paths when font files are available:
 /* Sales OS Design System - Light Theme Colors */
 :root {
   /* Background & Foreground */
-  --background: 0 0% 98%;
   /* #FAFAFA */
-  --foreground: 246 28% 7%;
   /* #0E0D17 */
 
   /* Card Colors */
-  --card: 0 0% 100%;
+  --card: oklch(1 0 0);
   /* #FFFFFF */
-  --card-foreground: 240 10% 3.9%;
+  --card-foreground: oklch(0.145 0 0);
   /* #090A0C */
 
   /* Popover Colors */
-  --popover: 0 0% 100%;
+  --popover: oklch(1 0 0);
   /* #FFFFFF */
-  --popover-foreground: 240 10% 3.9%;
+  --popover-foreground: oklch(0.145 0 0);
   /* #090A0C */
 
   /* Primary Colors */
-  --primary: 254 95% 60%;
+  --primary: oklch(0.205 0 0);
   /* #6337FA */
-  --primary-foreground: 0 0% 98%;
+  --primary-foreground: oklch(0.985 0 0);
   /* #FAFAFA */
   --primary-dark: 256 55% 23%;
   /* #2C1B5C */
 
   /* Secondary Colors */
-  --secondary: 255 60% 37%;
+  --secondary: oklch(0.97 0 0);
   /* #422698 */
-  --secondary-foreground: 0 0% 98%;
+  --secondary-foreground: oklch(0.205 0 0);
   /* #FAFAFA */
 
   /* Muted Colors */
-  --muted: 240 4.8% 95.9%;
+  --muted: oklch(0.97 0 0);
   /* #F4F3F9 */
-  --muted-foreground: 240 3.8% 46.1%;
+  --muted-foreground: oklch(0.556 0 0);
   /* #757185 */
 
   /* Accent Colors */
-  --accent: 264 100% 71%;
+  --accent: oklch(0.97 0 0);
   /* #A86DFF */
-  --accent-foreground: 240 5.9% 10%;
+  --accent-foreground: oklch(0.205 0 0);
   /* #090A0C */
 
   /* Destructive Colors */
-  --destructive: 0 84.2% 60.2%;
+  --destructive: oklch(0.577 0.245 27.325);
   /* #E93D3D */
   --destructive-foreground: 0 0% 98%;
   /* #FAFAFA */
 
   /* Border & Input */
-  --border: 240 5.9% 90%;
+  --border: oklch(0.922 0 0);
   /* #E6E5EB */
-  --input: 240 5.9% 90%;
+  --input: oklch(0.922 0 0);
   /* #E6E5EB */
-  --ring: 240 10% 3.9%;
+  --ring: oklch(0.708 0 0);
   /* #090A0C */
 
   /* Chart Colors */
-  --chart-1: 12 76% 61%;
+  --chart-1: oklch(0.646 0.222 41.116);
   /* #E85D45 */
-  --chart-2: 173 58% 39%;
+  --chart-2: oklch(0.6 0.118 184.704);
   /* #2F9E98 */
-  --chart-3: 197 37% 24%;
+  --chart-3: oklch(0.398 0.07 227.392);
   /* #264B57 */
-  --chart-4: 43 74% 66%;
+  --chart-4: oklch(0.828 0.189 84.429);
   /* #EBC244 */
-  --chart-5: 27 87% 67%;
+  --chart-5: oklch(0.769 0.188 70.08);
   /* #F87F3B */
 
   /* Sidebar Colors */
   --sidebar-background: 0 0% 98%;
-  --sidebar-foreground: 240 5.3% 26.1%;
-  --sidebar-primary: 240 5.9% 10%;
-  --sidebar-primary-foreground: 0 0% 98%;
-  --sidebar-accent: 240 4.8% 95.9%;
-  --sidebar-accent-foreground: 240 5.9% 10%;
-  --sidebar-border: 220 13% 91%;
-  --sidebar-ring: 217.2 91.2% 59.8%;
+  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar-primary: oklch(0.205 0 0);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.97 0 0);
+  --sidebar-accent-foreground: oklch(0.205 0 0);
+  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-ring: oklch(0.708 0 0);
 
   /* Border Radius */
-  --radius: 0.5rem;
+  --radius: 0.625rem;
+  --background: oklch(1 0 0);
+  --foreground: oklch(0.145 0 0);
+  --sidebar: oklch(0.985 0 0);
 }
-
 
 /* Sales OS Design System - Dark Theme Colors */
 .dark {
   /* Background & Foreground */
-  --background: 246 28% 7%;
+  --background: oklch(0.145 0 0);
   /* #0E0D17 */
-  --foreground: 0 0% 98%;
+  --foreground: oklch(0.985 0 0);
   /* #FAFAFA */
 
   /* Card Colors */
-  --card: 240 10% 3.9%;
+  --card: oklch(0.205 0 0);
   /* #090A12 */
-  --card-foreground: 0 0% 98%;
+  --card-foreground: oklch(0.985 0 0);
   /* #FAFAFA */
 
   /* Popover Colors */
-  --popover: 240 10% 3.9%;
+  --popover: oklch(0.205 0 0);
   /* #090A12 */
-  --popover-foreground: 0 0% 98%;
+  --popover-foreground: oklch(0.985 0 0);
   /* #FAFAFA */
 
   /* Primary Colors (same as light) */
-  --primary: 254 95% 60%;
+  --primary: oklch(0.922 0 0);
   /* #6337FA */
-  --primary-foreground: 0 0% 98%;
+  --primary-foreground: oklch(0.205 0 0);
   /* #FAFAFA */
   --primary-dark: 256 55% 23%;
   /* #2C1B5C */
 
   /* Secondary Colors */
-  --secondary: 255 60% 37%;
+  --secondary: oklch(0.269 0 0);
   /* #422698 */
-  --secondary-foreground: 0 0% 98%;
+  --secondary-foreground: oklch(0.985 0 0);
   /* #FAFAFA */
 
   /* Muted Colors */
-  --muted: 240 3.7% 15.9%;
+  --muted: oklch(0.269 0 0);
   /* #282631 */
-  --muted-foreground: 240 5% 64.9%;
+  --muted-foreground: oklch(0.708 0 0);
   /* #A3A1B0 */
 
   /* Accent Colors */
-  --accent: 240 3.7% 15.9%;
+  --accent: oklch(0.269 0 0);
   /* #282631 */
-  --accent-foreground: 0 0% 98%;
+  --accent-foreground: oklch(0.985 0 0);
   /* #FAFAFA */
 
   /* Destructive Colors */
-  --destructive: 0 62.8% 30.6%;
+  --destructive: oklch(0.704 0.191 22.216);
   /* #7E1D1D */
   --destructive-foreground: 0 0% 98%;
   /* #FAFAFA */
 
   /* Border & Input */
-  --border: 240 3.7% 15.9%;
+  --border: oklch(1 0 0 / 10%);
   /* #282631 */
-  --input: 240 3.7% 15.9%;
+  --input: oklch(1 0 0 / 15%);
   /* #282631 */
-  --ring: 240 4.9% 83.9%;
+  --ring: oklch(0.556 0 0);
   /* #D4D4D8 */
 
   /* Chart Colors (Dark Theme) */
-  --chart-1: 220 70% 50%;
+  --chart-1: oklch(0.488 0.243 264.376);
   /* #3B7CD6 */
-  --chart-2: 160 60% 45%;
+  --chart-2: oklch(0.696 0.17 162.48);
   /* #39A785 */
-  --chart-3: 30 80% 55%;
+  --chart-3: oklch(0.769 0.188 70.08);
   /* #E69B3A */
-  --chart-4: 280 65% 60%;
+  --chart-4: oklch(0.627 0.265 303.9);
   /* #9F5DC8 */
-  --chart-5: 340 75% 55%;
+  --chart-5: oklch(0.645 0.246 16.439);
   /* #E14B89 */
 
   /* Sidebar Colors (Dark) */
   --sidebar-background: 240 5.9% 10%;
-  --sidebar-foreground: 240 4.8% 95.9%;
-  --sidebar-primary: 224.3 76.3% 48%;
-  --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 240 3.7% 15.9%;
-  --sidebar-accent-foreground: 240 4.8% 95.9%;
-  --sidebar-border: 240 3.7% 15.9%;
-  --sidebar-ring: 217.2 91.2% 59.8%;
+  --sidebar-foreground: oklch(0.985 0 0);
+  --sidebar-primary: oklch(0.488 0.243 264.376);
+  --sidebar-primary-foreground: oklch(0.985 0 0);
+  --sidebar-accent: oklch(0.269 0 0);
+  --sidebar-accent-foreground: oklch(0.985 0 0);
+  --sidebar-border: oklch(1 0 0 / 10%);
+  --sidebar-ring: oklch(0.556 0 0);
+  --sidebar: oklch(0.205 0 0);
 }
 
 /* Sales OS Design System - Custom Animations */
@@ -401,4 +405,51 @@ body {
 .overflow-wrap-anywhere {
   overflow-wrap: anywhere;
   word-break: break-word;
+}
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground;
+  }
 }
