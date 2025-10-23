@@ -28,7 +28,7 @@ import { useFullscreenGuard } from '@/hooks/use-fullscreen-guard'
 
 import { ACTIVE_STATUS_LABEL } from '@/constants/exam'
 
-import { ExamLayout, MissingCandidateNotice } from './components'
+import { ExamLayout, MissingCandidateNotice, SubmitConfirmationDialog } from './components'
 
 export const ExamPageContent = () => {
   const router = useRouter()
@@ -51,6 +51,7 @@ export const ExamPageContent = () => {
   const [currentAnswer, setCurrentAnswer] = useState('')
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
   const [showWarningDialog, setShowWarningDialog] = useState(false)
+  const [showSubmitDialog, setShowSubmitDialog] = useState(false)
   const [isProcessingViolation, setIsProcessingViolation] = useState(false)
   const [answersCache, setAnswersCache] = useState<Record<string, string>>({})
   const [timeRemainingLabel, setTimeRemainingLabel] = useState('--:--')
@@ -124,7 +125,7 @@ export const ExamPageContent = () => {
     // Prepare all answers from cache including current answer
     const currentQ = questions[currentQuestionIndex]
     const allAnswers = { ...answersCache }
-    
+
     // Include current answer in the cache
     if (currentQ && currentAnswer.trim()) {
       allAnswers[currentQ.questionId] = currentAnswer
@@ -171,7 +172,7 @@ export const ExamPageContent = () => {
         // Prepare all answers from cache including current answer
         const currentQ = questions[currentQuestionIndex]
         const allAnswers = { ...answersCache }
-        
+
         // Include current answer in the cache
         if (currentQ && currentAnswer.trim()) {
           allAnswers[currentQ.questionId] = currentAnswer
@@ -271,15 +272,19 @@ export const ExamPageContent = () => {
     const handlers = {
       visibilitychange: () => document.hidden && handleViolation('window-blur'),
       blur: () => handleViolation('window-blur'),
-      fullscreenchange: () =>
-        !document.fullscreenElement && handleViolation('fullscreen-exit'),
+      fullscreenchange: () => {
+        // Only re-request fullscreen, don't track as violation
+        if (!document.fullscreenElement) {
+          // Could add logic here to re-request fullscreen if needed
+        }
+      },
       copy: (e: Event) => {
         e.preventDefault()
-        handleViolation('copy-attempt')
+        // Only prevent copy, don't track as violation
       },
       paste: (e: Event) => {
         e.preventDefault()
-        handleViolation('paste-attempt')
+        // Only prevent paste, don't track as violation
       },
       contextmenu: (e: Event) => e.preventDefault()
     }
@@ -391,6 +396,11 @@ export const ExamPageContent = () => {
     )
       return
 
+    // Show confirmation dialog instead of directly submitting
+    setShowSubmitDialog(true)
+  }
+
+  const handleSubmitConfirmation = async (): Promise<void> => {
     // All answers will be saved in bulk during handleSubmitAttempt
     await handleSubmitAttempt()
   }
@@ -400,30 +410,41 @@ export const ExamPageContent = () => {
     return <MissingCandidateNotice onNavigate={() => router.push('/form1')} />
 
   return (
-    <ExamLayout
-      statusLabel={
-        attemptStatus === 'running'
-          ? ACTIVE_STATUS_LABEL
-          : attemptStatus === 'terminated'
-            ? 'Attempt terminated'
-            : attemptStatus === 'auto_submitted'
-              ? 'Attempt auto-submitted'
-              : 'Attempt submitted'
-      }
-      timeRemainingLabel={timeRemainingLabel}
-      currentQuestionIndex={currentQuestionIndex}
-      questionsCount={questions.length}
-      currentQuestion={currentQuestion}
-      currentAnswer={currentAnswer}
-      isAttemptActive={isAttemptActive}
-      isSubmitPending={isSubmitPending}
-      onAnswerChange={handleAnswerChange}
-      onMove={handleMove}
-      onFinish={handleFinishAttemptClick}
-      showWarningDialog={showWarningDialog}
-      onWarningDialogChange={setShowWarningDialog}
-      onWarningAcknowledge={handleWarningAcknowledge}
-    />
+    <>
+      <ExamLayout
+        statusLabel={
+          attemptStatus === 'running'
+            ? ACTIVE_STATUS_LABEL
+            : attemptStatus === 'terminated'
+              ? 'Attempt terminated'
+              : attemptStatus === 'auto_submitted'
+                ? 'Attempt auto-submitted'
+                : 'Attempt submitted'
+        }
+        timeRemainingLabel={timeRemainingLabel}
+        currentQuestionIndex={currentQuestionIndex}
+        questionsCount={questions.length}
+        currentQuestion={currentQuestion}
+        currentAnswer={currentAnswer}
+        isAttemptActive={isAttemptActive}
+        isSubmitPending={isSubmitPending}
+        attemptStartTime={attemptInfo?.startAt}
+        attemptEndTime={attemptInfo?.endsAt}
+        onAnswerChange={handleAnswerChange}
+        onMove={handleMove}
+        onFinish={handleFinishAttemptClick}
+        showWarningDialog={showWarningDialog}
+        onWarningDialogChange={setShowWarningDialog}
+        onWarningAcknowledge={handleWarningAcknowledge}
+      />
+
+      <SubmitConfirmationDialog
+        open={showSubmitDialog}
+        onOpenChange={setShowSubmitDialog}
+        onConfirm={handleSubmitConfirmation}
+        isSubmitPending={isSubmitPending}
+      />
+    </>
   )
 }
 

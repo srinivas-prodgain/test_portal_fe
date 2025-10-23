@@ -25,6 +25,8 @@ import {
 } from '@/components/ui/form'
 import { Textarea } from '@/components/ui/textarea'
 
+import { TimerProgressBar } from './timer-progress-bar'
+
 const answerSchema = z.object({
   answer: z.string()
 })
@@ -40,6 +42,8 @@ type QuestionPanelProps = {
   isSubmitPending: boolean
   statusLabel: string
   timeRemainingLabel: string
+  attemptStartTime?: string
+  attemptEndTime?: string
   onAnswerChange: (value: string) => void
   onMove: (direction: 'next' | 'previous') => void
   onFinish: () => Promise<void>
@@ -54,6 +58,8 @@ export const QuestionPanel = ({
   isSubmitPending,
   statusLabel,
   timeRemainingLabel,
+  attemptStartTime,
+  attemptEndTime,
   onAnswerChange,
   onMove,
   onFinish
@@ -79,16 +85,12 @@ export const QuestionPanel = ({
     onAnswerChange(value)
   }
 
-  const progress =
-    questionsCount > 0
-      ? Math.min(100, ((currentQuestionIndex + 1) / questionsCount) * 100)
-      : 0
 
   const statusClasses = isActive
-    ? 'bg-violet-100 text-violet-600'
+    ? 'bg-green-50 text-green-700 border-green-200'
     : isSubmitted
-      ? 'bg-emerald-100 text-emerald-600'
-      : 'bg-amber-100 text-amber-700'
+      ? 'bg-blue-50 text-blue-700 border-blue-200'
+      : 'bg-amber-50 text-amber-700 border-amber-200'
   const displayStatus = isActive
     ? 'Active'
     : isSubmitted
@@ -96,48 +98,85 @@ export const QuestionPanel = ({
       : statusLabel
 
   return (
-    <div className="mx-auto w-full max-w-4xl space-y-6 px-4 py-10">
-      <div className="overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm">
-        <div className="flex flex-wrap items-center justify-between gap-4 px-6 py-5">
-          <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-violet-50 text-violet-600">
-              <Clock className="h-5 w-5" />
+    <div className="mx-auto w-full max-w-6xl space-y-4 px-3 py-4">
+      {/* Professional Header */}
+      <div className="bg-white border !border-gray-200 rounded-lg shadow-sm">
+        <div className="px-4 py-4 lg:px-6 lg:py-5">
+          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-4 lg:gap-6">
+              {/* Question Counter */}
+              <div className="flex items-center space-x-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 border !border-blue-100">
+                  <span className="text-base font-semibold text-blue-700">
+                    {currentQuestionIndex + 1}
+                  </span>
+                </div>
+                <div>
+                  <p className="text-xs font-medium text-gray-600">Question</p>
+                  <p className="text-base font-semibold text-gray-900">
+                    {currentQuestionIndex + 1} of {questionsCount || 1}
+                  </p>
+                </div>
+              </div>
+
+              {/* Timer */}
+              <div className="flex items-center space-x-3">
+                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gray-50 border !border-gray-100">
+                  <Clock className="h-5 w-5 text-gray-600" />
+                </div>
+                <div>
+                  <p className="text-xs font-medium text-gray-600">Time Remaining</p>
+                  <p className="text-base font-semibold text-gray-900 font-mono">
+                    {timeRemainingLabel}
+                  </p>
+                </div>
+              </div>
             </div>
-            <div>
-              <p className="text-xs font-medium uppercase tracking-wide text-slate-500">
-                Time Remaining
-              </p>
-              <p className="text-lg font-semibold text-slate-900">
-                {timeRemainingLabel}
+
+            {/* Status */}
+            <div className="flex items-center">
+              <span
+                className={`inline-flex items-center px-3 py-1.5 rounded-md text-sm font-medium border ${statusClasses}`}
+              >
+                {displayStatus}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Timer Progress Bar */}
+        {attemptStartTime && attemptEndTime && (
+          <div className="px-4 pb-4 lg:px-6 lg:pb-5">
+            <TimerProgressBar
+              startTime={attemptStartTime}
+              endTime={attemptEndTime}
+            />
+          </div>
+        )}
+      </div>
+
+      {/* Question Card */}
+      <Card className="bg-white border !border-gray-200 rounded-lg shadow-sm flex-1">
+        <CardHeader className="px-4 py-4 lg:px-6 lg:py-5 !border-b !border-gray-100">
+          <div className="flex items-start space-x-3">
+            <div className="flex-shrink-0">
+              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-blue-100 text-blue-700 text-sm font-semibold">
+                Q{currentQuestionIndex + 1}
+              </div>
+            </div>
+            <div className="flex-1 min-w-0">
+              <CardTitle className="text-lg font-semibold leading-relaxed text-gray-900 mb-1 break-words">
+                {currentQuestion?.question ?? 'Loading question...'}
+              </CardTitle>
+              <p className="text-sm text-gray-500">
+                Please provide a detailed answer in the text area below.
               </p>
             </div>
           </div>
-          <span
-            className={`inline-flex items-center rounded-full px-4 py-1 text-sm font-medium ${statusClasses}`}
-          >
-            {displayStatus}
-          </span>
-          <p className="text-sm font-semibold text-slate-500">
-            Question {currentQuestionIndex + 1} of {questionsCount || 1}
-          </p>
-        </div>
-        <div className="h-1.5 w-full bg-slate-100">
-          <div
-            className="h-full rounded-full bg-violet-500 transition-all duration-300 ease-out"
-            style={{ width: `${progress}%` }}
-          />
-        </div>
-      </div>
-
-      <Card className="overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm">
-        <CardHeader className="px-8 pb-0 pt-10">
-          <CardTitle className="text-[1.75rem] font-semibold leading-snug text-slate-900">
-            {currentQuestion?.question ?? 'Loading question...'}
-          </CardTitle>
         </CardHeader>
 
         <Form {...form}>
-          <CardContent className="px-8 pb-6 pt-6">
+          <CardContent className="px-4 py-4 lg:px-6 lg:py-5">
             <FormField
               control={form.control}
               name="answer"
@@ -148,7 +187,7 @@ export const QuestionPanel = ({
                       {...field}
                       onChange={(e) => handleAnswerChange(e.target.value)}
                       placeholder="Type your answer here..."
-                      className="min-h-[18rem] resize-none rounded-lg border border-slate-100 bg-white p-6 text-base leading-relaxed text-slate-900 placeholder:text-slate-400 focus:border-violet-500 focus:outline-none focus:ring-2 focus:ring-violet-200 disabled:bg-slate-100"
+                      className="min-h-[16rem] lg:min-h-[18rem] resize-none rounded-lg border !border-gray-300 bg-white p-4 lg:p-5 text-base leading-relaxed text-gray-900 placeholder:text-gray-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-100 disabled:bg-gray-50 disabled:text-gray-500"
                       disabled={!isAttemptActive}
                     />
                   </FormControl>
@@ -158,16 +197,16 @@ export const QuestionPanel = ({
             />
           </CardContent>
 
-          <CardFooter className="flex flex-col gap-4 border-t border-slate-100 bg-slate-50 px-8 pb-8 pt-6 sm:flex-row sm:items-center sm:justify-between">
-            <div className="flex flex-wrap gap-3">
+          <CardFooter className="flex flex-col gap-3 border-t !border-gray-100 bg-gray-50 px-4 py-4 lg:px-6 lg:py-5 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-wrap gap-2">
               <Button
                 type="button"
                 variant="outline"
                 onClick={() => onMove('previous')}
                 disabled={currentQuestionIndex === 0 || !isAttemptActive}
-                className="h-11 gap-2 rounded-full border border-slate-100 bg-white px-6 text-sm font-medium text-slate-600 hover:bg-slate-100 disabled:opacity-40"
+                className="h-10 gap-2 rounded-lg border !border-gray-300 bg-white px-4 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                <ChevronLeft className="h-5 w-5" />
+                <ChevronLeft className="h-4 w-4" />
                 Previous
               </Button>
               <Button
@@ -177,10 +216,10 @@ export const QuestionPanel = ({
                 disabled={
                   currentQuestionIndex >= questionsCount - 1 || !isAttemptActive
                 }
-                className="h-11 gap-2 rounded-full border border-slate-100 bg-white px-6 text-sm font-medium text-slate-600 hover:bg-slate-100 disabled:opacity-40"
+                className="h-10 gap-2 rounded-lg border !border-gray-300 bg-white px-4 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Next
-                <ChevronRight className="h-5 w-5" />
+                <ChevronRight className="h-4 w-4" />
               </Button>
             </div>
 
@@ -188,16 +227,16 @@ export const QuestionPanel = ({
               type="button"
               onClick={onFinish}
               disabled={isSubmitPending || !isAttemptActive}
-              className="h-11 gap-2 rounded-full bg-violet-600 px-8 text-sm font-semibold text-white shadow-sm transition hover:bg-violet-700 disabled:opacity-40"
+              className="h-10 gap-2 rounded-lg bg-blue-600 px-6 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isSubmitPending ? (
                 <>
-                  <div className="h-5 w-5 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 !border-white/30 border-t-white" />
                   Submitting...
                 </>
               ) : (
                 <>
-                  <CheckCircle2 className="h-5 w-5" />
+                  <CheckCircle2 className="h-4 w-4" />
                   Submit Assessment
                 </>
               )}

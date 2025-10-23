@@ -16,6 +16,8 @@ export type ExamLayoutProps = {
   currentAnswer: string
   isAttemptActive: boolean
   isSubmitPending: boolean
+  attemptStartTime?: string
+  attemptEndTime?: string
   onAnswerChange: (value: string) => void
   onMove: (direction: 'next' | 'previous') => void
   onFinish: () => Promise<void>
@@ -33,6 +35,8 @@ export const ExamLayout = ({
   currentAnswer,
   isAttemptActive,
   isSubmitPending,
+  attemptStartTime,
+  attemptEndTime,
   onAnswerChange,
   onMove,
   onFinish,
@@ -41,12 +45,9 @@ export const ExamLayout = ({
   onWarningAcknowledge
 }: ExamLayoutProps) => {
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-blue-50">
-      {/* Background Pattern */}
-      <div className="absolute inset-0 bg-grid-pattern opacity-5" />
-      
-      <div className="relative mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:px-6 sm:py-8">
-        <main className="flex flex-col gap-6">
+    <div className="min-h-screen bg-gray-50">
+      <div className="relative mx-auto w-full max-w-7xl flex-1 px-2 py-3 sm:px-4 sm:py-4 lg:px-6 lg:py-6">
+        <main className="flex flex-col h-full">
           <QuestionPanel
             currentQuestionIndex={currentQuestionIndex}
             questionsCount={questionsCount}
@@ -59,6 +60,8 @@ export const ExamLayout = ({
             onFinish={onFinish}
             statusLabel={statusLabel}
             timeRemainingLabel={timeRemainingLabel}
+            attemptStartTime={attemptStartTime}
+            attemptEndTime={attemptEndTime}
           />
         </main>
       </div>

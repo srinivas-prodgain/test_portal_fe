@@ -112,7 +112,7 @@ export default function CandidateIntakePage() {
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-100 px-4 py-12">
       <div className="w-full max-w-xl space-y-6">
-        <Card className="rounded-3xl border border-gray-100 shadow-sm">
+        <Card className="rounded-3xl border !border-slate-300 shadow-sm">
           <CardHeader className="space-y-2 px-8 pt-8">
             <CardTitle className="text-2xl font-semibold text-slate-900">
               Your Information
@@ -134,13 +134,13 @@ export default function CandidateIntakePage() {
                         Email Address
                       </FormLabel>
                       <FormControl>
-                        <div className="flex items-center gap-3 rounded-lg bg-white border border-red-800  px-4">
-                          <Mail className="h-4 w-4 text-slate-400" />
+                        <div className="flex items-center gap-3 rounded-lg bg-white border !border-slate-300 px-4">
+                          <Mail className="h-4 w-4 text-slate-400 " />
                           <Input
                             type="email"
                             placeholder="you@example.com"
                             autoComplete="email"
-                            className="h-12 border-0 bg-transparent text-base focus-visible:ring-0 focus-visible:ring-offset-0"
+                            className="h-12 border-0 pl-0 bg-transparent text-base focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none"
                             {...field}
                           />
                         </div>
@@ -159,11 +159,11 @@ export default function CandidateIntakePage() {
                         LinkedIn Profile
                       </FormLabel>
                       <FormControl>
-                        <div className="flex items-center gap-3 rounded-lg border border-slate-100 bg-white px-4">
+                        <div className="flex items-center gap-3 rounded-lg border !border-slate-300 bg-white px-4">
                           <Linkedin className="h-4 w-4 text-slate-400" />
                           <Input
                             placeholder="https://linkedin.com/in/username"
-                            className="h-12 border-0 bg-transparent text-base focus-visible:ring-0 focus-visible:ring-offset-0"
+                            className="h-12 border-0 pl-0 bg-transparent text-base focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none"
                             {...field}
                           />
                         </div>
@@ -182,11 +182,11 @@ export default function CandidateIntakePage() {
                         GitHub Profile
                       </FormLabel>
                       <FormControl>
-                        <div className="flex items-center gap-3 rounded-lg border border-slate-100 bg-white pl-4">
+                        <div className="flex items-center gap-3 rounded-lg border !border-slate-300 bg-white pl-4">
                           <Github className="h-4 w-4 text-slate-400" />
                           <Input
                             placeholder="https://github.com/username"
-                            className="h-12 border-0 bg-transparent text-base focus-visible:ring-0 focus-visible:ring-offset-0"
+                            className="h-12 border-0 pl-0 bg-transparent text-base focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none"
                             {...field}
                           />
                         </div>
@@ -210,11 +210,11 @@ export default function CandidateIntakePage() {
                         </span>
                       </div>
                       <FormControl>
-                        <div className="flex items-center gap-3 rounded-lg border border-slate-100 bg-white px-4">
+                        <div className="flex items-center gap-3 rounded-lg border !border-slate-300 bg-white px-4">
                           <FileText className="h-4 w-4 text-slate-400" />
                           <Input
                             placeholder="Share a link to your resume"
-                            className="h-12 border-0 bg-transparent text-base focus-visible:ring-0 focus-visible:ring-offset-0"
+                            className="h-12 border-0 pl-0 bg-transparent text-base focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none"
                             {...field}
                           />
                         </div>
@@ -236,7 +236,7 @@ export default function CandidateIntakePage() {
                 <Button
                   type="submit"
                   disabled={isPending || isPreparingExam}
-                  className="flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-violet-600 text-base font-semibold text-white shadow-sm transition hover:bg-violet-700 disabled:opacity-50"
+                  className="flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-violet-500 text-base font-semibold text-white shadow-sm transition hover:bg-violet-700 disabled:opacity-50 cursor-pointer"
                 >
                   {isPending || isPreparingExam ? (
                     <>

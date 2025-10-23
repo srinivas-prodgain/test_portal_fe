@@ -1,0 +1,62 @@
+'use client'
+
+import { useEffect, useMemo, useState } from 'react'
+
+type TimerProgressBarProps = {
+  startTime: string
+  endTime: string
+}
+
+export const TimerProgressBar = ({
+  startTime,
+  endTime
+}: TimerProgressBarProps) => {
+  const [currentTime, setCurrentTime] = useState(new Date())
+
+  // Update current time more frequently for smoother animation
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentTime(new Date())
+    }, 100) // Update every 100ms for smoother transitions
+
+    return () => clearInterval(interval)
+  }, [])
+  const { progressPercentage, colorClass, shouldBlink } = useMemo(() => {
+    const start = new Date(startTime).getTime()
+    const end = new Date(endTime).getTime()
+    const current = currentTime.getTime()
+
+    const totalDuration = end - start
+    const timeRemaining = Math.max(0, end - current)
+
+    // Calculate progress as percentage of time REMAINING (starts at 100%, goes to 0%)
+    const remainingPercentage = Math.max(0, Math.min(100, (timeRemaining / totalDuration) * 100))
+
+    let colorClass = 'bg-green-600' // Default green
+    let shouldBlink = false
+
+    if (remainingPercentage <= 10) {
+      colorClass = 'bg-red-600'
+      shouldBlink = true
+    } else if (remainingPercentage <= 25) {
+      colorClass = 'bg-amber-500'
+      shouldBlink = false
+    }
+
+    return {
+      progressPercentage: remainingPercentage,
+      colorClass,
+      shouldBlink
+    }
+  }, [startTime, endTime, currentTime])
+
+  return (
+    <div className="h-2 w-full bg-gray-200 rounded-full overflow-hidden">
+      <div
+        className={`h-full transition-all duration-75 ease-linear ${colorClass} ${shouldBlink ? 'animate-pulse' : ''
+          }`}
+        style={{ width: `${progressPercentage}%` }}
+      />
+    </div>
+  )
+}
