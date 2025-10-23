@@ -1,0 +1,12 @@
+# Ignore artifacts:
+build
+coverage
+
+# Ignore all HTML files:
+*.html
+
+# Ignore specific files:
+.next
+node_modules
+package-lock.json
+yarn.lock

@@ -253,13 +253,14 @@ interface IUserData {
 // app/dashboard/users/page.tsx
 'use client'
 
+import { useGetAllUsers } from '@/hooks/api/user'
+
 import {
   ErrorPage,
   PageHeader,
   PageLoader,
   UsersList
 } from '@/components/shared'
-import { useGetAllUsers } from '@/hooks/api/user'
 
 // Main page component at top
 const UsersPage = () => {
@@ -286,7 +287,7 @@ export default UsersPage
 
 // Page-level helper component (only used on this page)
 const EmptyState = ({ message }: { message: string }) => (
-  <div className="text-muted-foreground py-12 text-center">{message}</div>
+  <div className="py-12 text-center text-muted-foreground">{message}</div>
 )
 ```
 
@@ -300,8 +301,8 @@ const EmptyState = ({ message }: { message: string }) => (
 // hooks/api/user.ts - Complete API implementation
 import { useMutation, useQuery } from '@tanstack/react-query'
 
-import { api } from '@/lib/api'
 import type { TMutationOpts, TQueryOpts } from '@/types/api'
+import { api } from '@/lib/api'
 
 // Types - Named consistently with functions
 type TGetAllUsersParams = {

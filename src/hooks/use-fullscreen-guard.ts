@@ -1,46 +1,46 @@
-"use client";
+'use client'
 
-import { useCallback, useEffect } from "react";
+import { useCallback, useEffect } from 'react'
 
 export const useFullscreenGuard = ({
-  is_active,
+  isActive
 }: {
-  is_active: boolean;
+  isActive: boolean
 }): {
-  request_fullscreen: () => Promise<void>;
+  requestFullscreen: () => Promise<void>
 } => {
-  const request_fullscreen = useCallback(async () => {
+  const requestFullscreen = useCallback(async () => {
     if (document.fullscreenElement) {
-      return;
+      return
     }
 
     try {
-      await document.documentElement.requestFullscreen();
+      await document.documentElement.requestFullscreen()
     } catch (error) {
-      console.error("Failed to enter fullscreen mode", error);
+      console.error('Failed to enter fullscreen mode', error)
     }
-  }, []);
+  }, [])
 
   useEffect(() => {
-    if (!is_active) {
-      return;
+    if (!isActive) {
+      return
     }
 
-    const handle_change = () => {
+    const handleChange = () => {
       if (!document.fullscreenElement) {
         // Automatically re-enter fullscreen when user exits
-        void request_fullscreen();
+        void requestFullscreen()
       }
-    };
+    }
 
-    document.addEventListener("fullscreenchange", handle_change);
+    document.addEventListener('fullscreenchange', handleChange)
 
     return () => {
-      document.removeEventListener("fullscreenchange", handle_change);
-    };
-  }, [is_active, request_fullscreen]);
+      document.removeEventListener('fullscreenchange', handleChange)
+    }
+  }, [isActive, requestFullscreen])
 
   return {
-    request_fullscreen,
-  };
-};
+    requestFullscreen
+  }
+}

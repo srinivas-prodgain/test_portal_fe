@@ -1,19 +1,21 @@
-"use client";
+import * as React from 'react'
 
-import type { DetailedHTMLProps, InputHTMLAttributes } from "react";
+import { cn } from '@/lib/utils'
 
-import { cn } from "@/lib/utils";
-
-export type TInputProps = DetailedHTMLProps<InputHTMLAttributes<HTMLInputElement>, HTMLInputElement>;
-
-export const Input = ({ className, ...props }: TInputProps) => {
+function Input({ className, type, ...props }: React.ComponentProps<'input'>) {
   return (
     <input
+      type={type}
+      data-slot="input"
       className={cn(
-        "flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-ring disabled:cursor-not-allowed disabled:opacity-60",
+        'shadow-xs h-9 w-full min-w-0 rounded-md border border-input bg-transparent px-3 py-1 text-base outline-none transition-[color,box-shadow] selection:bg-primary selection:text-primary-foreground file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm dark:bg-input/30',
+        'focus-visible:border-ring focus-visible:ring-[0.1875rem] focus-visible:ring-ring/50',
+        'aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive',
         className
       )}
       {...props}
     />
-  );
-};
+  )
+}
+
+export { Input }

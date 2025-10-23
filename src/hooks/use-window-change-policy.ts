@@ -1,62 +1,62 @@
-"use client";
+'use client'
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef } from 'react'
 
-import type { TViolationType } from "@/types/exam";
+import type { TViolationType } from '@/types/exam'
 
 export const useWindowChangePolicy = ({
-  is_active,
-  on_violation,
+  isActive,
+  onViolation
 }: {
-  is_active: boolean;
-  on_violation?: (type: TViolationType) => void;
+  isActive: boolean
+  onViolation?: (type: TViolationType) => void
 }): void => {
-  const last_event_timestamp_ref = useRef(0);
+  const lastEventTimestampRef = useRef(0)
 
   useEffect(() => {
-    if (!is_active) {
-      return;
+    if (!isActive) {
+      return
     }
 
     const notify = (type: TViolationType) => {
-      if (!on_violation) {
-        return;
+      if (!onViolation) {
+        return
       }
 
-      const now = Date.now();
-      if (now - last_event_timestamp_ref.current < 400) {
-        return;
+      const now = Date.now()
+      if (now - lastEventTimestampRef.current < 400) {
+        return
       }
 
-      last_event_timestamp_ref.current = now;
-      on_violation(type);
-    };
+      lastEventTimestampRef.current = now
+      onViolation(type)
+    }
 
-    const handle_visibility_change = () => {
-      if (document.visibilityState === "hidden") {
-        notify("window-blur");
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') {
+        notify('window-blur')
       }
-    };
+    }
 
-    const handle_window_blur = () => {
-      notify("window-blur");
-    };
+    const handleWindowBlur = () => {
+      notify('window-blur')
+    }
 
-    const handle_window_focus = () => {
+    const handleWindowFocus = () => {
       // Only track focus changes that indicate tab switching
-      if (document.visibilityState === "visible") {
-        notify("window-focus-change");
+      if (document.visibilityState === 'visible') {
+        notify('window-focus-change')
       }
-    };
+    }
 
-    document.addEventListener("visibilitychange", handle_visibility_change);
-    window.addEventListener("blur", handle_window_blur);
-    window.addEventListener("focus", handle_window_focus);
+    document.addEventListener('visibilitychange', handleVisibilityChange)
+    window.addEventListener('blur', handleWindowBlur)
+    window.addEventListener('focus', handleWindowFocus)
 
     return () => {
-      document.removeEventListener("visibilitychange", handle_visibility_change);
-      window.removeEventListener("blur", handle_window_blur);
-      window.removeEventListener("focus", handle_window_focus);
-    };
-  }, [is_active, on_violation]);
-};
+      document.removeEventListener('visibilitychange', handleVisibilityChange)
+      window.removeEventListener('blur', handleWindowBlur)
+      window.removeEventListener('focus', handleWindowFocus)
+    }
+  }, [isActive, onViolation])
+}
