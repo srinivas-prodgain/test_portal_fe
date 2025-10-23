@@ -4,6 +4,8 @@ export const ACTIVE_STATUS_LABEL = 'Attempt in progress'
 
 export const AUTO_SUBMIT_BUFFER_MS = 500
 
+export const MAX_WARNINGS_ALLOWED = 3
+
 export const formatTimeRemaining = ({
   milliseconds
 }: {

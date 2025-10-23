@@ -192,6 +192,11 @@ export const ExamPageContent = () => {
           answers: answersToSend
         })
 
+        // Update violation count in attempt info
+        setAttempt((prev) =>
+          prev ? { ...prev, violationCount: response.violationCount } : prev
+        )
+
         if (response.action === 'warn') {
           setShowWarningDialog(true)
         } else if (response.action === 'terminate') {
@@ -273,9 +278,9 @@ export const ExamPageContent = () => {
       visibilitychange: () => document.hidden && handleViolation('window-blur'),
       blur: () => handleViolation('window-blur'),
       fullscreenchange: () => {
-        // Only re-request fullscreen, don't track as violation
+        // Track fullscreen exit as violation
         if (!document.fullscreenElement) {
-          // Could add logic here to re-request fullscreen if needed
+          handleViolation('fullscreen')
         }
       },
       copy: (e: Event) => {
@@ -325,6 +330,13 @@ export const ExamPageContent = () => {
 
     const handleRefreshShortcuts = (event: KeyboardEvent) => {
       const key = event.key.toLowerCase()
+      
+      // Disable ESC key to prevent easy fullscreen exit
+      if (event.key === 'Escape') {
+        event.preventDefault()
+        return
+      }
+
       const isRefreshKey =
         event.key === 'F5' || (key === 'r' && (event.metaKey || event.ctrlKey))
       if (!isRefreshKey) return
@@ -436,6 +448,7 @@ export const ExamPageContent = () => {
         showWarningDialog={showWarningDialog}
         onWarningDialogChange={setShowWarningDialog}
         onWarningAcknowledge={handleWarningAcknowledge}
+        violationCount={attemptInfo?.violationCount ?? 0}
       />
 
       <SubmitConfirmationDialog

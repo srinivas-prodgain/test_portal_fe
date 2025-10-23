@@ -24,6 +24,7 @@ export type ExamLayoutProps = {
   showWarningDialog: boolean
   onWarningDialogChange: Dispatch<SetStateAction<boolean>>
   onWarningAcknowledge: () => Promise<void>
+  violationCount: number
 }
 
 export const ExamLayout = ({
@@ -42,7 +43,8 @@ export const ExamLayout = ({
   onFinish,
   showWarningDialog,
   onWarningDialogChange,
-  onWarningAcknowledge
+  onWarningAcknowledge,
+  violationCount
 }: ExamLayoutProps) => {
   return (
     <div className="min-h-screen bg-gray-50">
@@ -70,6 +72,7 @@ export const ExamLayout = ({
         open={showWarningDialog}
         onOpenChange={onWarningDialogChange}
         onAcknowledge={onWarningAcknowledge}
+        violationCount={violationCount}
       />
     </div>
   )

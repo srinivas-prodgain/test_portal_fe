@@ -13,21 +13,26 @@ import {
   AlertDialogHeader,
   AlertDialogTitle
 } from '@/components/ui/alert-dialog'
+import { MAX_WARNINGS_ALLOWED } from '@/constants/exam'
 
 type ViolationWarningDialogProps = {
   open: boolean
   onOpenChange: Dispatch<SetStateAction<boolean>>
   onAcknowledge: () => Promise<void>
+  violationCount: number
 }
 
 export const ViolationWarningDialog = ({
   open,
   onOpenChange,
-  onAcknowledge
+  onAcknowledge,
+  violationCount
 }: ViolationWarningDialogProps) => {
   const handleAcknowledge = useCallback(() => {
     void onAcknowledge()
   }, [onAcknowledge])
+
+  const remainingWarnings = MAX_WARNINGS_ALLOWED - violationCount
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
@@ -44,8 +49,9 @@ export const ViolationWarningDialog = ({
           </AlertDialogTitle>
           <AlertDialogDescription className="space-y-4 text-left text-sm leading-relaxed text-slate-600">
             <p>
-              We detected activity that breaks the assessment rules. This is
-              your warning—any further issues will end the exam immediately.
+              We detected activity that breaks the assessment rules. This is warning {violationCount} of {MAX_WARNINGS_ALLOWED}. 
+              You have {remainingWarnings} warning{remainingWarnings !== 1 ? 's' : ''} remaining—any further violations after 
+              your final warning will end the exam immediately.
             </p>
             <div className="space-y-2">
               <p className="text-sm font-semibold text-slate-700">
@@ -53,7 +59,6 @@ export const ViolationWarningDialog = ({
               </p>
               <ul className="space-y-1.5 rounded-lg bg-slate-50 px-4 py-3 text-sm">
                 <li>• Leaving fullscreen or switching tabs/windows</li>
-                <li>• Copying, pasting, or capturing exam content</li>
                 <li>• Opening developer tools or inspector panes</li>
               </ul>
             </div>

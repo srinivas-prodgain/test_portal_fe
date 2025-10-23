@@ -11,6 +11,7 @@ type TCreateAttemptResponse = {
     attempt_id: string
     start_at: string
     ends_at: string
+    violation_count: number
   }
 }
 
@@ -29,7 +30,8 @@ export const useCreateAttempt = () => {
       return {
         attemptId: data.attempt_id,
         startAt: data.start_at,
-        endsAt: data.ends_at
+        endsAt: data.ends_at,
+        violationCount: data.violation_count
       }
     }
   })
