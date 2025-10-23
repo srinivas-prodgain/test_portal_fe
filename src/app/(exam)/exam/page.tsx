@@ -60,7 +60,8 @@ export const ExamPageContent = () => {
     attemptInfo,
     attemptStatus,
     currentQuestionIndex,
-    currentAnswer
+    currentAnswer,
+    answersCache
   })
 
   // Computed Values
@@ -77,9 +78,10 @@ export const ExamPageContent = () => {
       attemptInfo,
       attemptStatus,
       currentQuestionIndex,
-      currentAnswer
+      currentAnswer,
+      answersCache
     }
-  }, [attemptInfo, attemptStatus, currentQuestionIndex, currentAnswer])
+  }, [attemptInfo, attemptStatus, currentQuestionIndex, currentAnswer, answersCache])
 
   // Security Hooks
   useDisableCopyPaste({ isActive: isAttemptActive })
@@ -107,7 +109,7 @@ export const ExamPageContent = () => {
 
   // Submit Attempt
   const handleSubmitAttempt = useCallback(async (isAutoSubmit = false): Promise<void> => {
-    const { attemptInfo, attemptStatus, currentQuestionIndex, currentAnswer } =
+    const { attemptInfo, attemptStatus, currentQuestionIndex, currentAnswer, answersCache } =
       stateRefs.current
     const attemptId = attemptInfo?.attemptId
 
@@ -119,22 +121,25 @@ export const ExamPageContent = () => {
       return
     }
 
-    // Save current answer before submitting
+    // Prepare all answers from cache including current answer
     const currentQ = questions[currentQuestionIndex]
+    const allAnswers = { ...answersCache }
+    
+    // Include current answer in the cache
     if (currentQ && currentAnswer.trim()) {
-      try {
-        await updateAnswer({
-          attemptId,
-          questionId: currentQ.questionId,
-          answers: currentAnswer
-        })
-      } catch (error) {
-        console.error('Failed to save current answer:', error)
-      }
+      allAnswers[currentQ.questionId] = currentAnswer
     }
 
+    // Convert cached answers to the format expected by API
+    const answersToSubmit = Object.entries(allAnswers)
+      .filter(([, answer]) => answer.trim()) // Only include non-empty answers
+      .map(([questionId, answer]) => ({
+        questionId,
+        answers: answer
+      }))
+
     try {
-      await submitAttempt({ attemptId, answers: [], isAutoSubmit })
+      await submitAttempt({ attemptId, answers: answersToSubmit, isAutoSubmit })
       const finalStatus = isAutoSubmit ? 'auto_submitted' : 'submitted'
       setAttemptStatus(finalStatus)
       router.replace(`/submit?status=${finalStatus}`)
@@ -144,7 +149,6 @@ export const ExamPageContent = () => {
   }, [
     isSubmitPending,
     questions,
-    updateAnswer,
     submitAttempt,
     router
   ])
@@ -152,7 +156,7 @@ export const ExamPageContent = () => {
   // Handle Violations
   const handleViolation = useCallback(
     async (type: TViolationType): Promise<void> => {
-      const { attemptInfo, attemptStatus } = stateRefs.current
+      const { attemptInfo, attemptStatus, currentQuestionIndex, currentAnswer, answersCache } = stateRefs.current
       if (
         !attemptInfo?.attemptId ||
         attemptStatus !== 'running' ||
@@ -164,10 +168,27 @@ export const ExamPageContent = () => {
       setIsProcessingViolation(true)
 
       try {
+        // Prepare all answers from cache including current answer
+        const currentQ = questions[currentQuestionIndex]
+        const allAnswers = { ...answersCache }
+        
+        // Include current answer in the cache
+        if (currentQ && currentAnswer.trim()) {
+          allAnswers[currentQ.questionId] = currentAnswer
+        }
+
+        // Convert cached answers to the format expected by API
+        const answersToSend = Object.entries(allAnswers)
+          .filter(([, answer]) => answer.trim()) // Only include non-empty answers
+          .map(([questionId, answer]) => ({
+            questionId,
+            answers: answer
+          }))
+
         const response = await registerEvent({
           attemptId: attemptInfo.attemptId,
           type,
-          answers: []
+          answers: answersToSend
         })
 
         if (response.action === 'warn') {
@@ -184,6 +205,7 @@ export const ExamPageContent = () => {
     },
     [
       isProcessingViolation,
+      questions,
       registerEvent,
       router
     ]
@@ -354,18 +376,7 @@ export const ExamPageContent = () => {
     )
       return
 
-    if (currentAnswer.trim()) {
-      try {
-        await updateAnswer({
-          attemptId: attemptInfo.attemptId,
-          questionId: currentQuestion.questionId,
-          answers: currentAnswer
-        })
-      } catch (error) {
-        console.error('Failed to save answer:', error)
-      }
-    }
-
+    // No API call - just navigate between questions
     setCurrentQuestionIndex((prev) =>
       direction === 'next'
         ? Math.min(prev + 1, Math.max(questions.length - 1, 0))
@@ -376,23 +387,11 @@ export const ExamPageContent = () => {
   const handleFinishAttemptClick = async (): Promise<void> => {
     if (
       !isAttemptActive ||
-      !attemptInfo ||
-      !currentQuestion
+      !attemptInfo
     )
       return
 
-    if (currentAnswer.trim()) {
-      try {
-        await updateAnswer({
-          attemptId: attemptInfo.attemptId,
-          questionId: currentQuestion.questionId,
-          answers: currentAnswer
-        })
-      } catch (error) {
-        console.error('Failed to save final answer:', error)
-      }
-    }
-
+    // All answers will be saved in bulk during handleSubmitAttempt
     await handleSubmitAttempt()
   }
 

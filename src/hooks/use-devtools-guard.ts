@@ -47,6 +47,20 @@ export const useDevtoolsGuard = ({ isActive }: { isActive: boolean }): void => {
         return false
       }
 
+      // Block ctrl+R
+      if (event.ctrlKey && key === 'r') {
+        event.preventDefault()
+        event.stopPropagation()
+        return false
+      }
+
+      // Block ctrl+F
+      if (event.ctrlKey && key === 'f') {
+        event.preventDefault()
+        event.stopPropagation()
+        return false
+      }
+
       // Block Ctrl+Shift+K (Firefox console)
       if (event.ctrlKey && event.shiftKey && key === 'k') {
         event.preventDefault()
@@ -56,6 +70,20 @@ export const useDevtoolsGuard = ({ isActive }: { isActive: boolean }): void => {
 
       // Block Cmd+Option+I (Mac Inspector)
       if (event.metaKey && event.altKey && key === 'i') {
+        event.preventDefault()
+        event.stopPropagation()
+        return false
+      }
+
+      // BLock cmd+R
+      if (event.metaKey && key === 'r') {
+        event.preventDefault()
+        event.stopPropagation()
+        return false
+      }
+
+      // Block cmd+F
+      if (event.metaKey && key === 'f') {
         event.preventDefault()
         event.stopPropagation()
         return false
