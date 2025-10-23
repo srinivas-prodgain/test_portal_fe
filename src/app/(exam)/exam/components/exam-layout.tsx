@@ -4,7 +4,6 @@ import type { Dispatch, SetStateAction } from 'react'
 
 import type { TQuestion } from '@/types/exam'
 
-import { AttemptStatusHeader } from './attempt-status-header'
 import { QuestionPanel } from './question-panel'
 import { ViolationWarningDialog } from './violation-warning-dialog'
 
@@ -47,10 +46,6 @@ export const ExamLayout = ({
       <div className="absolute inset-0 bg-grid-pattern opacity-5" />
       
       <div className="relative mx-auto w-full max-w-6xl flex-1 px-4 py-6 sm:px-6 sm:py-8">
-        <AttemptStatusHeader
-          statusLabel={statusLabel}
-          timeRemainingLabel={timeRemainingLabel}
-        />
         <main className="flex flex-col gap-6">
           <QuestionPanel
             currentQuestionIndex={currentQuestionIndex}
@@ -62,6 +57,8 @@ export const ExamLayout = ({
             onAnswerChange={onAnswerChange}
             onMove={onMove}
             onFinish={onFinish}
+            statusLabel={statusLabel}
+            timeRemainingLabel={timeRemainingLabel}
           />
         </main>
       </div>
