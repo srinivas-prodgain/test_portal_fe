@@ -27,6 +27,17 @@ function SubmitPageContent() {
             'Please contact support if you believe this was an error.'
           ]
         }
+      case 'auto_submitted':
+        return {
+          title: 'Exam Auto-Submitted',
+          titleColor: 'text-chart-2',
+          description:
+            'Your exam time has expired and was automatically submitted.',
+          content: [
+            'All your responses have been recorded and will be reviewed by our team.',
+            'You will be contacted regarding the next steps in the process.'
+          ]
+        }
       default:
         return {
           title: 'Exam Submitted Successfully',

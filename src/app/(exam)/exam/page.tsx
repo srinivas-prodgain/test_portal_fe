@@ -10,15 +10,12 @@ import {
 } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 
-import { isAxiosError } from 'axios'
-
 import type {
   TAttemptResponse,
   TAttemptStatus,
   TViolationType
 } from '@/types/exam'
 import {
-  useCreateAttempt,
   useGetAttempt,
   useGetQuestions,
   useRegisterEvent,
@@ -29,29 +26,15 @@ import { useDevtoolsGuard } from '@/hooks/use-devtools-guard'
 import { useDisableCopyPaste } from '@/hooks/use-disable-copy-paste'
 import { useFullscreenGuard } from '@/hooks/use-fullscreen-guard'
 
-import {
-  ACTIVE_STATUS_LABEL,
-  AUTO_SUBMIT_BUFFER_MS,
-  formatTimeRemaining
-} from '@/constants/exam'
+import { ACTIVE_STATUS_LABEL } from '@/constants/exam'
 
-import {
-  AttemptErrorState,
-  AttemptLoadingState,
-  ExamLayout,
-  MissingCandidateNotice
-} from './components'
+import { ExamLayout, MissingCandidateNotice } from './components'
 
 export const ExamPageContent = () => {
   const router = useRouter()
   const candidateId = useSearchParams().get('candidate_id')
 
   // API Hooks
-  const {
-    mutateAsync: createAttempt,
-    isPending: isCreatingAttempt,
-    cancel: cancelCreateAttempt
-  } = useCreateAttempt()
   const attemptQuery = useGetAttempt(
     { candidateId: candidateId ?? '' },
     { enabled: Boolean(candidateId) }
@@ -67,19 +50,12 @@ export const ExamPageContent = () => {
   const [attemptStatus, setAttemptStatus] = useState<TAttemptStatus>('running')
   const [currentAnswer, setCurrentAnswer] = useState('')
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
-  const [attemptError, setAttemptError] = useState('')
-  const [timeRemaining, setTimeRemaining] = useState(0)
   const [showWarningDialog, setShowWarningDialog] = useState(false)
   const [isProcessingViolation, setIsProcessingViolation] = useState(false)
   const [answersCache, setAnswersCache] = useState<Record<string, string>>({})
+  const [timeRemainingLabel, setTimeRemainingLabel] = useState('--:--')
 
   // Refs
-  const timerFrameRef = useRef<number>(0)
-  const timerEndRef = useRef<string | null>(null)
-  const handleSubmitAttemptRef = useRef<() => Promise<void>>(() =>
-    Promise.resolve()
-  )
-  const attemptRequestedRef = useRef(false)
   const stateRefs = useRef({
     attemptInfo,
     attemptStatus,
@@ -94,34 +70,6 @@ export const ExamPageContent = () => {
   )
   const isAttemptActive = attemptStatus === 'running'
   const currentQuestion = questions[currentQuestionIndex]
-  const timeRemainingLabel = formatTimeRemaining({
-    milliseconds: timeRemaining
-  })
-  const shouldShowLoadingState =
-    Boolean(candidateId) &&
-    !attemptError &&
-    (!attemptInfo ||
-      attemptQuery.isLoading ||
-      attemptQuery.isPending ||
-      isCreatingAttempt ||
-      questionsQuery.isLoading)
-
-  useEffect(() => {
-    const handlePopState = () => {
-      if (shouldShowLoadingState) {
-        cancelCreateAttempt()
-        attemptRequestedRef.current = false
-      }
-    }
-
-    window.addEventListener('popstate', handlePopState)
-
-    return () => {
-      window.removeEventListener('popstate', handlePopState)
-      cancelCreateAttempt()
-      attemptRequestedRef.current = false
-    }
-  }, [cancelCreateAttempt, shouldShowLoadingState])
 
   // Keep refs in sync
   useEffect(() => {
@@ -157,40 +105,8 @@ export const ExamPageContent = () => {
     setAnswersCache(cache)
   }, [attemptInfo?.answers])
 
-  // Timer Management
-  const startTimer = useCallback((endsAt: string) => {
-    if (timerFrameRef.current) cancelAnimationFrame(timerFrameRef.current)
-
-    timerEndRef.current = endsAt
-    const endTime = new Date(endsAt).getTime()
-
-    const tick = (): void => {
-      const remaining = Math.max(endTime - Date.now(), 0)
-      setTimeRemaining(remaining)
-
-      if (remaining > AUTO_SUBMIT_BUFFER_MS) {
-        timerFrameRef.current = requestAnimationFrame(tick)
-      } else {
-        if (timerFrameRef.current) {
-          cancelAnimationFrame(timerFrameRef.current)
-          timerFrameRef.current = 0
-        }
-        void handleSubmitAttemptRef.current()
-      }
-    }
-    tick()
-  }, [])
-
-  const stopTimer = useCallback(() => {
-    if (timerFrameRef.current) {
-      cancelAnimationFrame(timerFrameRef.current)
-      timerFrameRef.current = 0
-    }
-    timerEndRef.current = null
-  }, [])
-
   // Submit Attempt
-  const handleSubmitAttempt = useCallback(async (): Promise<void> => {
+  const handleSubmitAttempt = useCallback(async (isAutoSubmit = false): Promise<void> => {
     const { attemptInfo, attemptStatus, currentQuestionIndex, currentAnswer } =
       stateRefs.current
     const attemptId = attemptInfo?.attemptId
@@ -198,13 +114,10 @@ export const ExamPageContent = () => {
     if (
       !attemptId ||
       attemptStatus !== 'running' ||
-      isSubmitPending ||
-      shouldShowLoadingState
+      isSubmitPending
     ) {
       return
     }
-
-    stopTimer()
 
     // Save current answer before submitting
     const currentQ = questions[currentQuestionIndex]
@@ -221,30 +134,20 @@ export const ExamPageContent = () => {
     }
 
     try {
-      await submitAttempt({ attemptId, answers: [] })
-      setAttemptStatus('submitted')
-      router.replace('/submit?status=submitted')
+      await submitAttempt({ attemptId, answers: [], isAutoSubmit })
+      const finalStatus = isAutoSubmit ? 'auto_submitted' : 'submitted'
+      setAttemptStatus(finalStatus)
+      router.replace(`/submit?status=${finalStatus}`)
     } catch (error) {
       console.error('Submission failed:', error)
-      if (attemptInfo?.endsAt && attemptStatus === 'running') {
-        const remaining = new Date(attemptInfo.endsAt).getTime() - Date.now()
-        if (remaining > 0) startTimer(attemptInfo.endsAt)
-      }
     }
   }, [
     isSubmitPending,
-    shouldShowLoadingState,
     questions,
     updateAnswer,
     submitAttempt,
-    router,
-    stopTimer,
-    startTimer
+    router
   ])
-
-  useEffect(() => {
-    handleSubmitAttemptRef.current = handleSubmitAttempt
-  }, [handleSubmitAttempt])
 
   // Handle Violations
   const handleViolation = useCallback(
@@ -253,8 +156,7 @@ export const ExamPageContent = () => {
       if (
         !attemptInfo?.attemptId ||
         attemptStatus !== 'running' ||
-        isProcessingViolation ||
-        shouldShowLoadingState
+        isProcessingViolation
       ) {
         return
       }
@@ -271,8 +173,7 @@ export const ExamPageContent = () => {
         if (response.action === 'warn') {
           setShowWarningDialog(true)
         } else if (response.action === 'terminate') {
-          stopTimer()
-          setAttemptStatus('submitted')
+          setAttemptStatus('terminated')
           router.replace('/submit?status=terminated')
         }
       } catch (error) {
@@ -283,9 +184,7 @@ export const ExamPageContent = () => {
     },
     [
       isProcessingViolation,
-      shouldShowLoadingState,
       registerEvent,
-      stopTimer,
       router
     ]
   )
@@ -295,80 +194,57 @@ export const ExamPageContent = () => {
     await requestFullscreen()
   }
 
-  // Load existing attempt or create new one
+  // Timer countdown
+  useEffect(() => {
+    if (!attemptInfo?.endsAt || !isAttemptActive) {
+      setTimeRemainingLabel('00:00')
+      return
+    }
+
+    const updateTimer = () => {
+      const now = new Date().getTime()
+      const endTime = new Date(attemptInfo.endsAt).getTime()
+      const timeLeft = Math.max(0, endTime - now)
+
+      if (timeLeft === 0) {
+        setTimeRemainingLabel('00:00')
+        // Auto-submit when time runs out
+        void handleSubmitAttempt(true)
+        return
+      }
+
+      const minutes = Math.floor(timeLeft / 60000)
+      const seconds = Math.floor((timeLeft % 60000) / 1000)
+      setTimeRemainingLabel(`${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`)
+    }
+
+    updateTimer()
+    const intervalId = setInterval(updateTimer, 1000)
+
+    return () => clearInterval(intervalId)
+  }, [attemptInfo?.endsAt, isAttemptActive, handleSubmitAttempt])
+
+  // Load existing attempt
   useEffect(() => {
     const existingAttempt = attemptQuery.data
     if (!existingAttempt) return
 
     setAttempt(existingAttempt)
-    setAttemptError('')
 
     if (existingAttempt.status === 'running') {
-      if (stateRefs.current.attemptStatus === 'submitted') return
       if (stateRefs.current.attemptStatus !== 'running')
         setAttemptStatus('running')
-      if (timerEndRef.current !== existingAttempt.endsAt)
-        startTimer(existingAttempt.endsAt)
-    } else {
-      if (stateRefs.current.attemptStatus !== 'submitted')
-        setAttemptStatus('submitted')
-      stopTimer()
-      setTimeRemaining(0)
-      if (existingAttempt.status)
-        router.replace(`/submit?status=${existingAttempt.status}`)
+    } else if (existingAttempt.status) {
+      const status = existingAttempt.status as TAttemptStatus
+      if (stateRefs.current.attemptStatus !== status)
+        setAttemptStatus(status)
+      router.replace(`/submit?status=${status}`)
     }
-  }, [attemptQuery.data, router, startTimer, stopTimer])
-
-  // Create attempt if not found
-  useEffect(() => {
-    if (
-      !candidateId ||
-      attemptRequestedRef.current ||
-      attemptQuery.isLoading ||
-      attemptQuery.isFetching ||
-      attemptQuery.isSuccess
-    ) {
-      return
-    }
-
-    const error = attemptQuery.error
-    if (isAxiosError(error) && error.response?.status === 404) {
-      attemptRequestedRef.current = true
-      createAttempt(candidateId)
-        .then((response: TAttemptResponse) => {
-          setAttempt(response)
-          setAttemptStatus('running')
-          setAttemptError('')
-          startTimer(response.endsAt)
-        })
-        .catch((error) => {
-          if ((error as { code?: string }).code === 'ERR_CANCELED') {
-            attemptRequestedRef.current = false
-            return
-          }
-          attemptRequestedRef.current = false
-          setAttemptError(
-            'Unable to create exam attempt. Please refresh and try again.'
-          )
-        })
-    } else {
-      setAttemptError(
-        'Unable to load exam attempt. Please refresh and try again.'
-      )
-    }
-  }, [
-    attemptQuery.error,
-    attemptQuery.isFetching,
-    attemptQuery.isLoading,
-    attemptQuery.isSuccess,
-    candidateId,
-    createAttempt,
-    startTimer
-  ])
+  }, [attemptQuery.data, router])
 
   // Security Event Listeners
   useEffect(() => {
-    if (!isAttemptActive || shouldShowLoadingState) return
+    if (!isAttemptActive) return
 
     const handlers = {
       visibilitychange: () => document.hidden && handleViolation('window-blur'),
@@ -407,7 +283,43 @@ export const ExamPageContent = () => {
       document.removeEventListener('paste', handlers.paste)
       document.removeEventListener('contextmenu', handlers.contextmenu)
     }
-  }, [isAttemptActive, shouldShowLoadingState, handleViolation])
+  }, [isAttemptActive, handleViolation])
+
+  useEffect(() => {
+    if (!isAttemptActive) return
+
+    const exitMessage =
+      'Refreshing or closing this tab will terminate your exam attempt. Do you want to exit?'
+
+    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
+      event.preventDefault()
+      event.returnValue = exitMessage
+    }
+
+    const handleRefreshShortcuts = (event: KeyboardEvent) => {
+      const key = event.key.toLowerCase()
+      const isRefreshKey =
+        event.key === 'F5' || (key === 'r' && (event.metaKey || event.ctrlKey))
+      if (!isRefreshKey) return
+
+      event.preventDefault()
+      const shouldExit = window.confirm(
+        'Do you want to exit the exam? This action will terminate your attempt.'
+      )
+      if (shouldExit) {
+        setAttemptStatus('terminated')
+        router.replace('/submit?status=terminated')
+      }
+    }
+
+    window.addEventListener('beforeunload', handleBeforeUnload)
+    window.addEventListener('keydown', handleRefreshShortcuts)
+
+    return () => {
+      window.removeEventListener('beforeunload', handleBeforeUnload)
+      window.removeEventListener('keydown', handleRefreshShortcuts)
+    }
+  }, [isAttemptActive, router])
 
   // Load answer when question changes
   useEffect(() => {
@@ -418,16 +330,12 @@ export const ExamPageContent = () => {
     setCurrentAnswer(answersCache[currentQuestion.questionId] ?? '')
   }, [currentQuestion, answersCache])
 
-  // Cleanup on unmount
-  useEffect(() => () => stopTimer(), [stopTimer])
-
   // Handlers
   const handleAnswerChange = (value: string): void => {
     if (
       !isAttemptActive ||
       !currentQuestion ||
-      !attemptInfo ||
-      shouldShowLoadingState
+      !attemptInfo
     )
       return
 
@@ -442,8 +350,7 @@ export const ExamPageContent = () => {
     if (
       !currentQuestion ||
       !isAttemptActive ||
-      !attemptInfo ||
-      shouldShowLoadingState
+      !attemptInfo
     )
       return
 
@@ -470,8 +377,7 @@ export const ExamPageContent = () => {
     if (
       !isAttemptActive ||
       !attemptInfo ||
-      !currentQuestion ||
-      shouldShowLoadingState
+      !currentQuestion
     )
       return
 
@@ -493,14 +399,17 @@ export const ExamPageContent = () => {
   // Render guards
   if (!candidateId)
     return <MissingCandidateNotice onNavigate={() => router.push('/form1')} />
-  if (attemptError && !attemptInfo)
-    return <AttemptErrorState message={attemptError} />
-  if (shouldShowLoadingState) return <AttemptLoadingState />
 
   return (
     <ExamLayout
       statusLabel={
-        attemptStatus === 'running' ? ACTIVE_STATUS_LABEL : 'Attempt submitted'
+        attemptStatus === 'running'
+          ? ACTIVE_STATUS_LABEL
+          : attemptStatus === 'terminated'
+            ? 'Attempt terminated'
+            : attemptStatus === 'auto_submitted'
+              ? 'Attempt auto-submitted'
+              : 'Attempt submitted'
       }
       timeRemainingLabel={timeRemainingLabel}
       currentQuestionIndex={currentQuestionIndex}
@@ -520,7 +429,7 @@ export const ExamPageContent = () => {
 }
 
 export const ExamPage = () => (
-  <Suspense fallback={<AttemptLoadingState />}>
+  <Suspense>
     <ExamPageContent />
   </Suspense>
 )

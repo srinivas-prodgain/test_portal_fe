@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 
-import type { TAttemptResponse, TSavedAnswerPayload } from '@/types/exam'
+import type { TAttemptResponse, TAttemptStatus, TSavedAnswerPayload } from '@/types/exam'
 import { api } from '@/lib/api'
 
 type TGetAttemptParams = {
@@ -16,13 +16,13 @@ type TRawAttemptResponse = {
   attempt_id: string
   start_at: string
   ends_at: string
-  status: string
+  status: TAttemptStatus
   violation_count: number
   answers: TRawAttemptAnswer[]
 }
 
 type TGetAttemptResponse = TAttemptResponse & {
-  status: string
+  status: TAttemptStatus
   violationCount: number
   answers: TSavedAnswerPayload[]
 }

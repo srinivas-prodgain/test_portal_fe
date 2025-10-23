@@ -6,7 +6,7 @@ export type TViolationType =
   | 'paste-attempt'
   | 'devtools-open'
 
-export type TAttemptStatus = 'running' | 'submitted' | 'terminated'
+export type TAttemptStatus = 'running' | 'submitted' | 'auto_submitted' | 'terminated'
 
 export type TQuestion = {
   questionId: string

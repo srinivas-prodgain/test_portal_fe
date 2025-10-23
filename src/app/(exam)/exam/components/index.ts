@@ -1,5 +1,4 @@
 export { AttemptErrorState } from './attempt-error-state'
-export { AttemptLoadingState } from './attempt-loading-state'
 export { AttemptStatusHeader } from './attempt-status-header'
 export { ExamLayout } from './exam-layout'
 export type { ExamLayoutProps } from './exam-layout'

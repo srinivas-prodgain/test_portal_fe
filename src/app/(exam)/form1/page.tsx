@@ -1,25 +1,25 @@
 'use client'
 
-import { useEffect } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import { AxiosError } from 'axios'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
-import { 
-  User, 
-  Mail, 
-  Linkedin, 
-  Github, 
-  FileText, 
+import {
+  User,
+  Mail,
+  Linkedin,
+  Github,
+  FileText,
   ArrowRight,
   CheckCircle2,
   AlertCircle
 } from 'lucide-react'
 
 import type { TCandidatePayload } from '@/types/exam'
-import { useCreateCandidate } from '@/hooks/api'
+import { useCreateCandidate, useCreateAttempt, useGetQuestions } from '@/hooks/api'
 
 import { Button } from '@/components/ui/button'
 import {
@@ -58,11 +58,20 @@ type CandidateFormValues = z.infer<typeof candidateFormSchema>
 
 export default function CandidateIntakePage() {
   const router = useRouter()
+  const [isPreparingExam, setIsPreparingExam] = useState(false)
+
   const {
     mutateAsync: createCandidate,
-    isPending,
-    cancel: cancelCreateCandidate
+    isPending
   } = useCreateCandidate()
+
+  const { mutateAsync: createAttempt } = useCreateAttempt()
+
+  const {
+    refetch: fetchQuestions,
+    data: questions,
+    isFetching: isQuestionsFetching
+  } = useGetQuestions({ enabled: false })
 
   const form = useForm<CandidateFormValues>({
     resolver: zodResolver(candidateFormSchema),
@@ -74,20 +83,6 @@ export default function CandidateIntakePage() {
     }
   })
 
-  useEffect(() => {
-    const handlePopState = () => {
-      if (isPending) {
-        cancelCreateCandidate()
-      }
-    }
-
-    window.addEventListener('popstate', handlePopState)
-
-    return () => {
-      window.removeEventListener('popstate', handlePopState)
-      cancelCreateCandidate()
-    }
-  }, [cancelCreateCandidate, isPending])
 
   const onSubmit = async (data: CandidateFormValues) => {
     try {
@@ -96,12 +91,24 @@ export default function CandidateIntakePage() {
         resume: data.resume || undefined
       }
 
-      const response = await createCandidate(payload)
-      router.replace(`/exam?candidate_id=${response.candidateId}`)
-    } catch (error) {
-      if ((error as { code?: string }).code === 'ERR_CANCELED') {
-        return
+      // Step 1: Create candidate
+      const candidateResponse = await createCandidate(payload)
+
+      // Step 2: Prepare exam (create attempt and load questions in parallel)
+      setIsPreparingExam(true)
+
+      const [attemptResponse, questionsResponse] = await Promise.all([
+        createAttempt(candidateResponse.candidateId),
+        fetchQuestions()
+      ])
+
+      // Step 3: Only redirect when both are successful
+      if (attemptResponse && questionsResponse.data) {
+        setIsPreparingExam(false)
+        router.replace(`/exam?candidate_id=${candidateResponse.candidateId}`)
       }
+    } catch (error) {
+      setIsPreparingExam(false)
 
       if (error instanceof AxiosError && error.response?.status === 409) {
         form.setError('root', {
@@ -120,7 +127,7 @@ export default function CandidateIntakePage() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
       {/* Background Pattern */}
       <div className="absolute inset-0 bg-grid-pattern opacity-5" />
-      
+
       <div className="relative flex min-h-screen items-center justify-center px-4 py-6 sm:px-6 sm:py-8">
         <div className="w-full max-w-2xl">
           {/* Header Section */}
@@ -143,7 +150,7 @@ export default function CandidateIntakePage() {
                 Please provide your details to begin the technical assessment
               </CardDescription>
             </CardHeader>
-            
+
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)}>
                 <CardContent className="space-y-6 p-6">
@@ -242,11 +249,11 @@ export default function CandidateIntakePage() {
                     </div>
                   )}
                 </CardContent>
-                
+
                 <CardFooter className="p-6 pt-6">
                   <Button
                     type="submit"
-                    disabled={isPending}
+                    disabled={isPending || isPreparingExam}
                     className="w-full h-10 text-base font-medium"
                     size="lg"
                   >
@@ -254,6 +261,11 @@ export default function CandidateIntakePage() {
                       <div className="flex items-center gap-2">
                         <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
                         Creating your session...
+                      </div>
+                    ) : isPreparingExam ? (
+                      <div className="flex items-center gap-2">
+                        <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                        Preparing your exam...
                       </div>
                     ) : (
                       <div className="flex items-center gap-2">
