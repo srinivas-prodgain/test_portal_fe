@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 
-import type { TAttemptResponse, TAttemptStatus, TSavedAnswerPayload } from '@/types/exam'
+import type { TAttemptResponse, TAttemptStatus, TAttemptViolation, TSavedAnswerPayload, TViolationType } from '@/types/exam'
 import { api } from '@/lib/api'
 
 type TGetAttemptParams = {
@@ -12,6 +12,11 @@ type TRawAttemptAnswer = {
   answers: string
 }
 
+type TRawAttemptViolation = {
+  type: TViolationType
+  timestamp: string
+}
+
 type TRawAttemptResponse = {
   message: string
   data: {
@@ -20,6 +25,7 @@ type TRawAttemptResponse = {
     ends_at: string
     status: TAttemptStatus
     violation_count: number
+    violations?: TRawAttemptViolation[]
     answers: TRawAttemptAnswer[]
   }
 }
@@ -27,6 +33,7 @@ type TRawAttemptResponse = {
 type TGetAttemptResponse = TAttemptResponse & {
   status: TAttemptStatus
   violationCount: number
+  violations?: TAttemptViolation[]
   answers: TSavedAnswerPayload[]
 }
 
@@ -45,6 +52,10 @@ const getAttempt = async ({
     endsAt: data.ends_at,
     status: data.status,
     violationCount: data.violation_count,
+    violations: data.violations?.map((violation) => ({
+      type: violation.type,
+      timestamp: violation.timestamp
+    })),
     answers: data.answers.map((answer) => ({
       questionId: answer.question_id,
       answers: answer.answers
