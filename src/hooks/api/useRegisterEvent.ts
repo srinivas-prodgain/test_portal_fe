@@ -12,14 +12,17 @@ type TRegisterEventPayload = {
 }
 
 type TRegisterEventResponse = {
-  action: 'warn' | 'terminate'
+  message: string
+  data: {
+    action: 'warn' | 'terminate'
+  }
 }
 
 const postViolationEvent = async ({
   attemptId,
   type,
   answers
-}: TRegisterEventPayload): Promise<TRegisterEventResponse> => {
+}: TRegisterEventPayload): Promise<{ action: 'warn' | 'terminate' }> => {
   const response = await api.post<TRegisterEventResponse>(
     `${attemptsEndpoint}/${attemptId}/event`,
     {
@@ -31,7 +34,7 @@ const postViolationEvent = async ({
     }
   )
 
-  return response.data
+  return response.data.data!
 }
 
 export const useRegisterEvent = () =>

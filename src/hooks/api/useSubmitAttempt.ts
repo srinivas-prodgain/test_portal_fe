@@ -11,12 +11,16 @@ type TSubmitAttemptPayload = {
   isAutoSubmit?: boolean
 }
 
+type TSubmitAttemptResponse = {
+  message: string
+}
+
 const submitAttempt = async ({
   attemptId,
   answers,
   isAutoSubmit = false
 }: TSubmitAttemptPayload): Promise<void> => {
-  await api.post<void>(`${attemptsEndpoint}/${attemptId}/submit`, {
+  await api.post<TSubmitAttemptResponse>(`${attemptsEndpoint}/${attemptId}/submit`, {
     answers: answers.map((answer) => ({
       question_id: answer.questionId,
       answers: answer.answers

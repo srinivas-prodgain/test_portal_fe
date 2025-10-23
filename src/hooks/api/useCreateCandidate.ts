@@ -6,7 +6,10 @@ import { api } from '@/lib/api'
 const candidatesEndpoint = '/candidates'
 
 type TCreateCandidateResponse = {
-  candidate_id: string
+  message: string
+  data: {
+    candidate_id: string
+  }
 }
 
 export const useCreateCandidate = () => {
@@ -25,7 +28,7 @@ export const useCreateCandidate = () => {
       )
 
       return {
-        candidateId: response.data.candidate_id
+        candidateId: response.data.data!.candidate_id
       }
     }
   })

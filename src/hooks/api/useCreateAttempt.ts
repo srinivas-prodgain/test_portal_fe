@@ -6,9 +6,12 @@ import { api } from '@/lib/api'
 const attemptsEndpoint = '/attempts'
 
 type TCreateAttemptResponse = {
-  attempt_id: string
-  start_at: string
-  ends_at: string
+  message: string
+  data: {
+    attempt_id: string
+    start_at: string
+    ends_at: string
+  }
 }
 
 export const useCreateAttempt = () => {
@@ -21,7 +24,7 @@ export const useCreateAttempt = () => {
         }
       )
 
-      const data = response.data
+      const data = response.data.data!
 
       return {
         attemptId: data.attempt_id,

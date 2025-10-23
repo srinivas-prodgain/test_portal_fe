@@ -12,13 +12,16 @@ type TRawQuestion = {
 }
 
 type TGetQuestionsResponse = {
-  questions: TRawQuestion[]
+  message: string
+  data: {
+    questions: TRawQuestion[]
+  }
 }
 
 const fetchQuestions = async (): Promise<TQuestion[]> => {
   const response = await api.get<TGetQuestionsResponse>(questionsEndpoint)
 
-  return response.data.questions.map((question) => ({
+  return response.data.data!.questions.map((question) => ({
     questionId: question.question_id,
     question: question.question
   }))
