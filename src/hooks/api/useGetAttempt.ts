@@ -13,12 +13,15 @@ type TRawAttemptAnswer = {
 }
 
 type TRawAttemptResponse = {
-  attempt_id: string
-  start_at: string
-  ends_at: string
-  status: TAttemptStatus
-  violation_count: number
-  answers: TRawAttemptAnswer[]
+  message: string
+  data: {
+    attempt_id: string
+    start_at: string
+    ends_at: string
+    status: TAttemptStatus
+    violation_count: number
+    answers: TRawAttemptAnswer[]
+  }
 }
 
 type TGetAttemptResponse = TAttemptResponse & {
@@ -34,7 +37,7 @@ const getAttempt = async ({
     params: { candidate_id: candidateId }
   })
 
-  const data = response.data
+  const data = response.data.data!
 
   return {
     attemptId: data.attempt_id,
