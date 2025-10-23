@@ -1,7 +1,7 @@
 import { redirect } from 'next/navigation'
 
-const home_route = '/form1'
+const homeRoute = '/form1'
 
-export default function Home(): never {
-  redirect(home_route)
+export default function Home() {
+  redirect(homeRoute)
 }

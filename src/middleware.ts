@@ -6,12 +6,12 @@ export const middleware = (request: NextRequest) => {
 
   // Check if user is trying to access the exam page
   if (pathname === '/exam') {
-    const candidate_id = searchParams.get('candidate_id')
+    const candidateId = searchParams.get('candidate_id')
 
     // If no candidate_id is present, redirect to form1
-    if (!candidate_id || candidate_id.trim() === '') {
-      const form_url = new URL('/form1', request.url)
-      return NextResponse.redirect(form_url)
+    if (!candidateId || candidateId.trim() === '') {
+      const formUrl = new URL('/form1', request.url)
+      return NextResponse.redirect(formUrl)
     }
   }
 

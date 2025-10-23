@@ -3,13 +3,13 @@
 import { useCallback, useEffect } from 'react'
 
 export const useFullscreenGuard = ({
-  is_active
+  isActive
 }: {
-  is_active: boolean
+  isActive: boolean
 }): {
-  request_fullscreen: () => Promise<void>
+  requestFullscreen: () => Promise<void>
 } => {
-  const request_fullscreen = useCallback(async () => {
+  const requestFullscreen = useCallback(async () => {
     if (document.fullscreenElement) {
       return
     }
@@ -22,25 +22,25 @@ export const useFullscreenGuard = ({
   }, [])
 
   useEffect(() => {
-    if (!is_active) {
+    if (!isActive) {
       return
     }
 
-    const handle_change = () => {
+    const handleChange = () => {
       if (!document.fullscreenElement) {
         // Automatically re-enter fullscreen when user exits
-        void request_fullscreen()
+        void requestFullscreen()
       }
     }
 
-    document.addEventListener('fullscreenchange', handle_change)
+    document.addEventListener('fullscreenchange', handleChange)
 
     return () => {
-      document.removeEventListener('fullscreenchange', handle_change)
+      document.removeEventListener('fullscreenchange', handleChange)
     }
-  }, [is_active, request_fullscreen])
+  }, [isActive, requestFullscreen])
 
   return {
-    request_fullscreen
+    requestFullscreen
   }
 }

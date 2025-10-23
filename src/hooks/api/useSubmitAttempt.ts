@@ -1,21 +1,28 @@
 import { useMutation } from '@tanstack/react-query'
 
 import type { TSavedAnswerPayload } from '@/types/exam'
-import { api_client } from '@/lib/api'
+import { api } from '@/lib/api'
 
-const attempts_endpoint = '/attempts'
+const attemptsEndpoint = '/attempts'
 
-const submit_attempt = async (payload: {
-  attempt_id: string
+type TSubmitAttemptPayload = {
+  attemptId: string
   answers: TSavedAnswerPayload[]
-}): Promise<void> => {
-  const { attempt_id, answers } = payload
-  await api_client.post<void>(`${attempts_endpoint}/${attempt_id}/submit`, {
-    answers
+}
+
+const submitAttempt = async ({
+  attemptId,
+  answers
+}: TSubmitAttemptPayload): Promise<void> => {
+  await api.post<void>(`${attemptsEndpoint}/${attemptId}/submit`, {
+    answers: answers.map((answer) => ({
+      question_id: answer.questionId,
+      answers: answer.answers
+    }))
   })
 }
 
 export const useSubmitAttempt = () =>
   useMutation({
-    mutationFn: submit_attempt
+    mutationFn: submitAttempt
   })

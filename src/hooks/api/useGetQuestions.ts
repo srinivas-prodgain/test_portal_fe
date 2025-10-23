@@ -1,22 +1,33 @@
 import { useQuery } from '@tanstack/react-query'
 
 import type { TQuestion } from '@/types/exam'
-import { api_client } from '@/lib/api'
+import { api } from '@/lib/api'
 
-const questions_endpoint = '/questions'
-const questions_query_key = ['questions'] as const
+const questionsEndpoint = '/questions'
+const questionsQueryKey = ['questions'] as const
 
-const fetch_questions = async (): Promise<TQuestion[]> => {
-  const response = await api_client.get<{ questions: TQuestion[] }>(
-    questions_endpoint
-  )
-  return response.data.questions
+type TRawQuestion = {
+  question_id: string
+  question: string
+}
+
+type TGetQuestionsResponse = {
+  questions: TRawQuestion[]
+}
+
+const fetchQuestions = async (): Promise<TQuestion[]> => {
+  const response = await api.get<TGetQuestionsResponse>(questionsEndpoint)
+
+  return response.data.questions.map((question) => ({
+    questionId: question.question_id,
+    question: question.question
+  }))
 }
 
 export const useGetQuestions = ({ enabled }: { enabled: boolean }) =>
   useQuery({
-    queryKey: questions_query_key,
-    queryFn: fetch_questions,
+    queryKey: questionsQueryKey,
+    queryFn: fetchQuestions,
     enabled,
     staleTime: Infinity
   })

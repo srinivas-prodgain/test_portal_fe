@@ -6,10 +6,10 @@ export type TViolationType =
   | 'paste-attempt'
   | 'devtools-open'
 
-export type TAttemptStatus = 'running' | 'submitted' | 'terminated' | 'expired'
+export type TAttemptStatus = 'running' | 'submitted' | 'terminated'
 
 export type TQuestion = {
-  id: string
+  questionId: string
   question: string
 }
 
@@ -19,17 +19,18 @@ export type TAttemptTiming = {
 }
 
 export type TAttemptResponse = TAttemptTiming & {
-  attempt_id: string
+  attemptId: string
+  answers?: TSavedAnswerPayload[]
 }
 
 export type TCandidatePayload = {
   email: string
-  linkedin_profile_url: string
-  github_profile_url: string
+  linkedinProfileUrl: string
+  githubProfileUrl: string
   resume?: string
 }
 
 export type TSavedAnswerPayload = {
-  questionID: string
+  questionId: string
   answers: string
 }

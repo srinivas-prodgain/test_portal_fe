@@ -1,24 +1,40 @@
 import { useMutation } from '@tanstack/react-query'
 
 import type { TSavedAnswerPayload, TViolationType } from '@/types/exam'
-import { api_client } from '@/lib/api'
+import { api } from '@/lib/api'
 
-const attempts_endpoint = '/attempts'
+const attemptsEndpoint = '/attempts'
 
-const post_violation_event = async (payload: {
-  attempt_id: string
+type TRegisterEventPayload = {
+  attemptId: string
   type: TViolationType
   answers: TSavedAnswerPayload[]
-}): Promise<{ action: 'warn' | 'terminate' | 'expired' }> => {
-  const { attempt_id, type, answers } = payload
-  const response = await api_client.post<{
-    action: 'warn' | 'terminate' | 'expired'
-  }>(`${attempts_endpoint}/${attempt_id}/event`, { type, answers })
+}
+
+type TRegisterEventResponse = {
+  action: 'warn' | 'terminate'
+}
+
+const postViolationEvent = async ({
+  attemptId,
+  type,
+  answers
+}: TRegisterEventPayload): Promise<TRegisterEventResponse> => {
+  const response = await api.post<TRegisterEventResponse>(
+    `${attemptsEndpoint}/${attemptId}/event`,
+    {
+      type,
+      answers: answers.map((answer) => ({
+        question_id: answer.questionId,
+        answers: answer.answers
+      }))
+    }
+  )
 
   return response.data
 }
 
 export const useRegisterEvent = () =>
   useMutation({
-    mutationFn: post_violation_event
+    mutationFn: postViolationEvent
   })

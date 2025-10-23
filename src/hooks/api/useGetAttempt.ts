@@ -1,29 +1,52 @@
 import { useQuery } from '@tanstack/react-query'
 
-import type { TAttemptResponse } from '@/types/exam'
-import { api_client } from '@/lib/api'
+import type { TAttemptResponse, TSavedAnswerPayload } from '@/types/exam'
+import { api } from '@/lib/api'
 
 type TGetAttemptParams = {
-  candidate_id: string
+  candidateId: string
+}
+
+type TRawAttemptAnswer = {
+  question_id: string
+  answers: string
+}
+
+type TRawAttemptResponse = {
+  attempt_id: string
+  start_at: string
+  ends_at: string
+  status: string
+  violation_count: number
+  answers: TRawAttemptAnswer[]
 }
 
 type TGetAttemptResponse = TAttemptResponse & {
   status: string
   violationCount: number
-  answers: Array<{
-    questionID: string
-    answers: string
-  }>
+  answers: TSavedAnswerPayload[]
 }
 
-const get_attempt = async ({
-  candidate_id
+const getAttempt = async ({
+  candidateId
 }: TGetAttemptParams): Promise<TGetAttemptResponse> => {
-  const response = await api_client.get<TGetAttemptResponse>('/attempts', {
-    params: { candidate_id }
+  const response = await api.get<TRawAttemptResponse>('/attempts', {
+    params: { candidate_id: candidateId }
   })
 
-  return response.data
+  const data = response.data
+
+  return {
+    attemptId: data.attempt_id,
+    startAt: data.start_at,
+    endsAt: data.ends_at,
+    status: data.status,
+    violationCount: data.violation_count,
+    answers: data.answers.map((answer) => ({
+      questionId: answer.question_id,
+      answers: answer.answers
+    }))
+  }
 }
 
 export const useGetAttempt = (
@@ -32,7 +55,7 @@ export const useGetAttempt = (
 ) => {
   return useQuery({
     queryKey: ['useGetAttempt', params],
-    queryFn: () => get_attempt(params),
+    queryFn: () => getAttempt(params),
     enabled: options?.enabled ?? true
   })
 }

@@ -12,10 +12,10 @@ import {
 } from '@/components/ui/card'
 
 function SubmitPageContent() {
-  const search_params = useSearchParams()
-  const status = search_params.get('status') || 'submitted'
+  const searchParams = useSearchParams()
+  const status = searchParams.get('status') || 'submitted'
 
-  const get_status_info = () => {
+  const getStatusInfo = () => {
     switch (status) {
       case 'terminated':
         return {
@@ -25,16 +25,6 @@ function SubmitPageContent() {
           content: [
             'Your responses up to the point of termination have been saved.',
             'Please contact support if you believe this was an error.'
-          ]
-        }
-      case 'expired':
-        return {
-          title: 'Time Expired',
-          titleColor: 'text-chart-3',
-          description: 'The exam time limit has been reached.',
-          content: [
-            'Your responses have been automatically saved.',
-            'All answers provided within the time limit have been recorded.'
           ]
         }
       default:
@@ -51,20 +41,20 @@ function SubmitPageContent() {
     }
   }
 
-  const status_info = get_status_info()
+  const statusInfo = getStatusInfo()
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center gap-4 bg-background px-6 text-center">
       <Card className="w-full max-w-lg">
         <CardHeader>
-          <CardTitle className={status_info.titleColor}>
-            {status_info.title}
+          <CardTitle className={statusInfo.titleColor}>
+            {statusInfo.title}
           </CardTitle>
-          <CardDescription>{status_info.description}</CardDescription>
+          <CardDescription>{statusInfo.description}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="space-y-4 text-sm text-muted-foreground">
-            {status_info.content.map((text, index) => (
+            {statusInfo.content.map((text, index) => (
               <p key={index}>{text}</p>
             ))}
           </div>
