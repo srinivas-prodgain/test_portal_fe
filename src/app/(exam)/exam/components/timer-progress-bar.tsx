@@ -56,9 +56,9 @@ export const TimerProgressBar = ({
   return (
     <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
       <div
-        className={`h-full transition-all duration-75 ease-linear ${colorClass} ${shouldBlink ? 'animate-pulse' : ''
+        className={`h-full transition-all duration-75 ease-linear progress-bar ${colorClass} ${shouldBlink ? 'animate-pulse' : ''
           }`}
-        style={{ width: `${progressPercentage}%` }}
+        style={{ '--progress-width': `${progressPercentage}%` } as React.CSSProperties & { '--progress-width': string }}
       />
     </div>
   )

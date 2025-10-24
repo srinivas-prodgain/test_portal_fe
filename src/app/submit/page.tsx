@@ -3,6 +3,7 @@
 import { Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import Image from 'next/image'
+import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 
 import {
   Card,
@@ -25,9 +26,10 @@ const SUCCESS_CONFIG = {
   accent: 'bg-[#10B981]/20 text-[#10B981]',
   icon: (
     <div className="flex size-16 items-center justify-center">
-      <iframe
-        src="https://lottie.host/embed/abf86e5e-28ed-4773-8dc8-3052cf0df941/wXuUMU8hYD.lottie"
-        style={{ width: '58px', height: '58px', border: 'none' }}
+      <DotLottieReact
+        src="https://lottie.host/07307152-3a12-41af-9211-764bc2e065d8/GyQlddACrw.lottie"
+        loop={true}
+        autoplay={true}
       />
     </div>
   )
@@ -56,9 +58,10 @@ const STATUS_CONFIG: Record<
     accent: 'bg-[#EF4444]/20 text-[#EF4444]',
     icon: (
       <div className="flex size-16 items-center justify-center">
-        <iframe
-          src="https://lottie.host/embed/851a187b-2044-43dc-a507-4b4f86628cf7/lK9ppwmD6l.lottie"
-          style={{ width: '58px', height: '58px', border: 'none' }}
+        <DotLottieReact
+          src="https://lottie.host/c1748831-e413-40a2-be67-c392d8ee251e/VYGQnvx1ZJ.lottie"
+          loop={true}
+          autoplay={true}
         />
       </div>
     )

@@ -9,7 +9,7 @@ export const ExamHeader = () => {
                 {/* Logo */}
                 <div className="flex items-center">
                     <Image
-                        src="/prodgain-wordmark-dark.svg"
+                        src="/prodgain-wordmark-light.svg"
                         alt="Prodgain"
                         width={140}
                         height={36}

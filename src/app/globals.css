@@ -39,20 +39,20 @@
 @import "tailwindcss";
 
 @theme {
-  --color-background: hsl(0 0% 98%);
-  /* #FAFAFA */
-  --color-foreground: hsl(246 28% 7%);
+  --color-background: hsl(246 28% 7%);
   /* #0E0D17 */
+  --color-foreground: hsl(0 0% 98%);
+  /* #FAFAFA */
 
-  --color-card: hsl(0 0% 100%);
-  /* #FFFFFF */
-  --color-card-foreground: hsl(240 10% 3.9%);
-  /* #090A0C */
+  --color-card: hsl(240 10% 3.9%);
+  /* #090A12 */
+  --color-card-foreground: hsl(0 0% 98%);
+  /* #FAFAFA */
 
-  --color-popover: hsl(0 0% 100%);
-  /* #FFFFFF */
-  --color-popover-foreground: hsl(240 10% 3.9%);
-  /* #090A0C */
+  --color-popover: hsl(240 10% 3.9%);
+  /* #090A12 */
+  --color-popover-foreground: hsl(0 0% 98%);
+  /* #FAFAFA */
 
   --color-primary: hsl(254 95% 60%);
   /* #6337FA */
@@ -61,43 +61,50 @@
   --color-primary-dark: hsl(256 55% 23%);
   /* #2C1B5C */
 
+  --color-background-darker: hsl(240 14% 3%);
+  /* #07080A */
+  --color-gradient-start: hsl(240 14% 2%);
+  /* #050608 */
+  --color-gradient-end: hsl(256 35% 18%);
+  /* #2A1F3D */
+
   --color-secondary: hsl(255 60% 37%);
   /* #422698 */
   --color-secondary-foreground: hsl(0 0% 98%);
   /* #FAFAFA */
 
-  --color-muted: hsl(240 4.8% 95.9%);
-  /* #F4F3F9 */
-  --color-muted-foreground: hsl(240 3.8% 46.1%);
-  /* #757185 */
+  --color-muted: hsl(240 3.7% 15.9%);
+  /* #282631 */
+  --color-muted-foreground: hsl(240 5% 64.9%);
+  /* #A3A1B0 */
 
-  --color-accent: hsl(264 100% 71%);
-  /* #A86DFF */
-  --color-accent-foreground: hsl(240 5.9% 10%);
-  /* #090A0C */
+  --color-accent: hsl(254 85% 45%);
+  /* #4A2BC7 - Darker variant of the original accent color */
+  --color-accent-foreground: hsl(0 0% 98%);
+  /* #FAFAFA */
 
-  --color-destructive: hsl(0 84.2% 60.2%);
-  /* #E93D3D */
+  --color-destructive: hsl(0 62.8% 30.6%);
+  /* #7E1D1D */
   --color-destructive-foreground: hsl(0 0% 98%);
   /* #FAFAFA */
 
-  --color-border: hsl(240 5.9% 90%);
-  /* #E6E5EB */
-  --color-input: hsl(240 5.9% 90%);
-  /* #E6E5EB */
-  --color-ring: hsl(240 10% 3.9%);
-  /* #090A0C */
+  --color-border: hsl(240 3.7% 15.9%);
+  /* #282631 */
+  --color-input: hsl(240 3.7% 15.9%);
+  /* #282631 */
+  --color-ring: hsl(240 4.9% 83.9%);
+  /* #D4D4D8 */
 
-  --color-chart-1: hsl(12 76% 61%);
-  /* #E85D45 */
-  --color-chart-2: hsl(173 58% 39%);
-  /* #2F9E98 */
-  --color-chart-3: hsl(197 37% 24%);
-  /* #264B57 */
-  --color-chart-4: hsl(43 74% 66%);
-  /* #EBC244 */
-  --color-chart-5: hsl(27 87% 67%);
-  /* #F87F3B */
+  --color-chart-1: hsl(220 70% 50%);
+  /* #3B7CD6 */
+  --color-chart-2: hsl(160 60% 45%);
+  /* #39A785 */
+  --color-chart-3: hsl(30 80% 55%);
+  /* #E69B3A */
+  --color-chart-4: hsl(280 65% 60%);
+  /* #9F5DC8 */
+  --color-chart-5: hsl(340 75% 55%);
+  /* #E14B89 */
 
   --radius-base: 0.5rem;
   --radius-lg: var(--radius-base);
@@ -107,70 +114,7 @@
 
 @layer base {
   :root {
-    color-scheme: light;
-  }
-
-  .dark {
     color-scheme: dark;
-    --color-background: hsl(246 28% 7%);
-    /* #0E0D17 */
-    --color-foreground: hsl(0 0% 98%);
-    /* #FAFAFA */
-
-    --color-card: hsl(240 10% 3.9%);
-    /* #090A12 */
-    --color-card-foreground: hsl(0 0% 98%);
-    /* #FAFAFA */
-
-    --color-popover: hsl(240 10% 3.9%);
-    /* #090A12 */
-    --color-popover-foreground: hsl(0 0% 98%);
-    /* #FAFAFA */
-
-    --color-primary: hsl(254 95% 60%);
-    /* #6337FA */
-    --color-primary-foreground: hsl(0 0% 98%);
-    /* #FAFAFA */
-    --color-primary-dark: hsl(256 55% 23%);
-    /* #2C1B5C */
-
-    --color-secondary: hsl(255 60% 37%);
-    /* #422698 */
-    --color-secondary-foreground: hsl(0 0% 98%);
-    /* #FAFAFA */
-
-    --color-muted: hsl(240 3.7% 15.9%);
-    /* #282631 */
-    --color-muted-foreground: hsl(240 5% 64.9%);
-    /* #A3A1B0 */
-
-    --color-accent: hsl(240 3.7% 15.9%);
-    /* #282631 */
-    --color-accent-foreground: hsl(0 0% 98%);
-    /* #FAFAFA */
-
-    --color-destructive: hsl(0 62.8% 30.6%);
-    /* #7E1D1D */
-    --color-destructive-foreground: hsl(0 0% 98%);
-    /* #FAFAFA */
-
-    --color-border: hsl(240 3.7% 15.9%);
-    /* #282631 */
-    --color-input: hsl(240 3.7% 15.9%);
-    /* #282631 */
-    --color-ring: hsl(240 4.9% 83.9%);
-    /* #D4D4D8 */
-
-    --color-chart-1: hsl(220 70% 50%);
-    /* #3B7CD6 */
-    --color-chart-2: hsl(160 60% 45%);
-    /* #39A785 */
-    --color-chart-3: hsl(30 80% 55%);
-    /* #E69B3A */
-    --color-chart-4: hsl(280 65% 60%);
-    /* #9F5DC8 */
-    --color-chart-5: hsl(340 75% 55%);
-    /* #E14B89 */
   }
 }
 
@@ -260,6 +204,18 @@
 }
 
 @layer utilities {
+  .bg-background-darker {
+    background-color: var(--color-background-darker);
+  }
+
+  .bg-gradient-form {
+    background: linear-gradient(to bottom right, var(--color-gradient-start), var(--color-gradient-end));
+  }
+
+  .progress-bar {
+    width: var(--progress-width, 0%);
+  }
+
   .animate-expand-width {
     animation: expandWidth 0.3s ease-out forwards;
   }

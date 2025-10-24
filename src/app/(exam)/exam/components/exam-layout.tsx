@@ -27,7 +27,7 @@ export const ExamLayout = ({
   violationCount
 }: ExamLayoutProps) => {
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background-darker">
       <ExamHeader />
 
       <div className="relative mx-auto w-full max-w-7xl flex-1 px-2 py-3 sm:px-4 sm:py-4 lg:px-6 lg:py-6">

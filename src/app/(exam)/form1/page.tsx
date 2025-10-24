@@ -125,7 +125,7 @@ export default function CandidateIntakePage() {
   }
 
   return (
-    <div className="relative flex min-h-screen flex-col overflow-hidden bg-[#07080A]">
+    <div className="relative flex min-h-screen flex-col overflow-hidden bg-background-darker">
       <div className="absolute inset-0 z-0 size-full">
         <Image
           fill
@@ -137,10 +137,10 @@ export default function CandidateIntakePage() {
       </div>
 
       <div className="relative z-10 flex min-h-screen items-center justify-center px-4 py-8">
-        <Card className="w-full max-w-5xl overflow-hidden rounded-xl border border-white/10 bg-[#0E0D17] text-white shadow-2xl">
+        <Card className="w-full max-w-5xl overflow-hidden rounded-xl border border-white/10 bg-background text-white shadow-2xl">
           <div className="grid md:grid-cols-2">
             {/* Left Side - Information */}
-            <div className="flex flex-col justify-between border-r border-white/5 bg-gradient-to-br from-[#050608] to-[#2A1F3D] rounded-xl p-8 md:p-10">
+            <div className="flex flex-col justify-between border-r border-white/5 bg-gradient-form rounded-xl p-8 md:p-10">
               <div className="space-y-8">
                 <div className="flex items-center">
                   <Image
@@ -156,7 +156,7 @@ export default function CandidateIntakePage() {
                     <h1 className="text-2xl font-semibold tracking-tight text-white">
                       Technical Assessment
                     </h1>
-                    <p className="mt-2 text-sm text-[#A3A1B0]">
+                    <p className="mt-2 text-sm text-muted-foreground">
                       Showcase your skills and join our talent pool
                     </p>
                   </div>
@@ -168,7 +168,7 @@ export default function CandidateIntakePage() {
                       </div>
                       <div>
                         <h3 className="text-sm font-medium text-white">Submit Your Details</h3>
-                        <p className="mt-1 text-sm text-[#A3A1B0]">
+                        <p className="mt-1 text-sm text-muted-foreground">
                           Provide your professional profiles to help us understand your background
                         </p>
                       </div>
@@ -180,7 +180,7 @@ export default function CandidateIntakePage() {
                       </div>
                       <div>
                         <h3 className="text-sm font-medium text-white">Complete the Assessment</h3>
-                        <p className="mt-1 text-sm text-[#A3A1B0]">
+                        <p className="mt-1 text-sm text-muted-foreground">
                           Answer technical questions in a monitored environment
                         </p>
                       </div>
@@ -192,7 +192,7 @@ export default function CandidateIntakePage() {
                       </div>
                       <div>
                         <h3 className="text-sm font-medium text-white">Get Evaluated</h3>
-                        <p className="mt-1 text-sm text-[#A3A1B0]">
+                        <p className="mt-1 text-sm text-muted-foreground">
                           Our team will review your submission and reach out with next steps
                         </p>
                       </div>
@@ -202,10 +202,10 @@ export default function CandidateIntakePage() {
               </div>
 
               <div className="mt-8 space-y-3 rounded-lg border border-white/5 bg-white/[0.02] p-4">
-                <p className="text-xs font-medium uppercase tracking-wide text-[#A3A1B0]">
+                <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                   Important Guidelines
                 </p>
-                <ul className="space-y-2 text-sm text-[#A3A1B0]">
+                <ul className="space-y-2 text-sm text-muted-foreground">
                   <li className="flex gap-2">
                     <span className="text-white">•</span>
                     <span>Ensure stable internet connection</span>
@@ -238,13 +238,13 @@ export default function CandidateIntakePage() {
                             Email Address
                           </FormLabel>
                           <FormControl>
-                            <div className="flex items-center gap-3 rounded-md border border-[#282631] bg-transparent px-4 py-3">
-                              <Mail className="h-5 w-5 text-[#A3A1B0]" />
+                            <div className="flex items-center gap-3 rounded-md border border-border bg-transparent px-4 py-3">
+                              <Mail className="h-5 w-5 text-muted-foreground" />
                               <Input
                                 type="email"
                                 placeholder="you@example.com"
                                 autoComplete="email"
-                                className="h-full w-full border-0 bg-transparent px-0 text-base text-[#FAFAFA] placeholder:text-[#A3A1B0] focus-visible:ring-0 focus-visible:ring-offset-0 [&:-webkit-autofill]:bg-transparent [&:-webkit-autofill]:[-webkit-text-fill-color:#FAFAFA] [&:-webkit-autofill]:[-webkit-box-shadow:0_0_0_1000px_#0E0D17_inset]"
+                                className="h-full w-full border-0 bg-transparent px-0 text-base text-foreground placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:ring-offset-0 [&:-webkit-autofill]:bg-transparent [&:-webkit-autofill]:[-webkit-text-fill-color:hsl(var(--foreground))] [&:-webkit-autofill]:[-webkit-box-shadow:0_0_0_1000px_hsl(var(--background))_inset]"
                                 {...field}
                               />
                             </div>
@@ -263,11 +263,11 @@ export default function CandidateIntakePage() {
                             LinkedIn Profile
                           </FormLabel>
                           <FormControl>
-                            <div className="flex items-center gap-3 rounded-md border border-[#282631] bg-transparent px-4 py-3">
-                              <Linkedin className="h-5 w-5 text-[#A3A1B0]" />
+                            <div className="flex items-center gap-3 rounded-md border border-border bg-transparent px-4 py-3">
+                              <Linkedin className="h-5 w-5 text-muted-foreground" />
                               <Input
                                 placeholder="https://linkedin.com/in/username"
-                                className="h-full w-full border-0 bg-transparent px-0 text-base text-[#FAFAFA] placeholder:text-[#A3A1B0] focus-visible:ring-0 focus-visible:ring-offset-0 [&:-webkit-autofill]:bg-transparent [&:-webkit-autofill]:[-webkit-text-fill-color:#FAFAFA] [&:-webkit-autofill]:[-webkit-box-shadow:0_0_0_1000px_#0E0D17_inset]"
+                                className="h-full w-full border-0 bg-transparent px-0 text-base text-foreground placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:ring-offset-0 [&:-webkit-autofill]:bg-transparent [&:-webkit-autofill]:[-webkit-text-fill-color:hsl(var(--foreground))] [&:-webkit-autofill]:[-webkit-box-shadow:0_0_0_1000px_hsl(var(--background))_inset]"
                                 {...field}
                               />
                             </div>
@@ -286,11 +286,11 @@ export default function CandidateIntakePage() {
                             GitHub Profile
                           </FormLabel>
                           <FormControl>
-                            <div className="flex items-center gap-3 rounded-md border border-[#282631] bg-transparent px-4 py-3">
-                              <Github className="h-5 w-5 text-[#A3A1B0]" />
+                            <div className="flex items-center gap-3 rounded-md border border-border bg-transparent px-4 py-3">
+                              <Github className="h-5 w-5 text-muted-foreground" />
                               <Input
                                 placeholder="https://github.com/username"
-                                className="h-full w-full border-0 bg-transparent px-0 text-base text-[#FAFAFA] placeholder:text-[#A3A1B0] focus-visible:ring-0 focus-visible:ring-offset-0 [&:-webkit-autofill]:bg-transparent [&:-webkit-autofill]:[-webkit-text-fill-color:#FAFAFA] [&:-webkit-autofill]:[-webkit-box-shadow:0_0_0_1000px_#0E0D17_inset]"
+                                className="h-full w-full border-0 bg-transparent px-0 text-base text-foreground placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:ring-offset-0 [&:-webkit-autofill]:bg-transparent [&:-webkit-autofill]:[-webkit-text-fill-color:hsl(var(--foreground))] [&:-webkit-autofill]:[-webkit-box-shadow:0_0_0_1000px_hsl(var(--background))_inset]"
                                 {...field}
                               />
                             </div>
@@ -309,16 +309,16 @@ export default function CandidateIntakePage() {
                             <FormLabel className="block text-sm">
                               Resume
                             </FormLabel>
-                            <span className="text-xs font-medium uppercase tracking-wide text-[#A3A1B0]">
+                            <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                               Optional
                             </span>
                           </div>
                           <FormControl>
-                            <div className="flex items-center gap-3 rounded-md border border-[#282631] bg-transparent px-4 py-3">
-                              <FileText className="h-5 w-5 text-[#A3A1B0]" />
+                            <div className="flex items-center gap-3 rounded-md border border-border bg-transparent px-4 py-3">
+                              <FileText className="h-5 w-5 text-muted-foreground" />
                               <Input
                                 placeholder="Share a link to your resume"
-                                className="h-full w-full border-0 bg-transparent px-0 text-base text-[#FAFAFA] placeholder:text-[#A3A1B0] focus-visible:ring-0 focus-visible:ring-offset-0 [&:-webkit-autofill]:bg-transparent [&:-webkit-autofill]:[-webkit-text-fill-color:#FAFAFA] [&:-webkit-autofill]:[-webkit-box-shadow:0_0_0_1000px_#0E0D17_inset]"
+                                className="h-full w-full border-0 bg-transparent px-0 text-base text-foreground placeholder:text-muted-foreground focus-visible:ring-0 focus-visible:ring-offset-0 [&:-webkit-autofill]:bg-transparent [&:-webkit-autofill]:[-webkit-text-fill-color:hsl(var(--foreground))] [&:-webkit-autofill]:[-webkit-box-shadow:0_0_0_1000px_hsl(var(--background))_inset]"
                                 {...field}
                               />
                             </div>

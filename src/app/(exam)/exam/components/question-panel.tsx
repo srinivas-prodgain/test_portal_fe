@@ -142,7 +142,7 @@ export const QuestionPanel = ({
                       {...field}
                       onChange={(e) => handleAnswerChange(e.target.value)}
                       placeholder="Type your answer here..."
-                      className="h-[24rem] lg:h-[28rem] max-h-[32rem] resize-none rounded-lg border bg-card p-4 lg:p-5 text-base leading-relaxed text-foreground placeholder:text-muted-foreground focus-visible:border-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 disabled:bg-muted disabled:text-muted-foreground overflow-y-auto"
+                      className="h-[24rem] lg:h-[28rem] max-h-[32rem] resize-none rounded-lg border bg-card p-4 lg:p-5 text-base leading-relaxed text-foreground placeholder:text-muted-foreground focus-visible:border-primary/40 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/15 disabled:bg-muted disabled:text-muted-foreground overflow-y-auto"
                       disabled={!isAttemptActive}
                     />
                   </FormControl>
