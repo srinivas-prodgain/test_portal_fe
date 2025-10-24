@@ -2,7 +2,7 @@
 
 import { Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
-import { AlertTriangle, CheckCircle2, Clock } from 'lucide-react'
+import Image from 'next/image'
 
 import {
   Card,
@@ -14,6 +14,25 @@ import {
 
 type TSubmitStatus = 'submitted' | 'auto_submitted' | 'terminated'
 
+const SUCCESS_CONFIG = {
+  title: 'Exam Submitted Successfully',
+  description:
+    'Your responses have been saved and will be reviewed by our team.',
+  points: [
+    'We will evaluate your answers and reach out with the next steps.',
+    'You can safely close this window—no further action is required.'
+  ],
+  accent: 'bg-[#10B981]/20 text-[#10B981]',
+  icon: (
+    <div className="flex size-16 items-center justify-center">
+      <iframe
+        src="https://lottie.host/embed/abf86e5e-28ed-4773-8dc8-3052cf0df941/wXuUMU8hYD.lottie"
+        style={{ width: '58px', height: '58px', border: 'none' }}
+      />
+    </div>
+  )
+}
+
 const STATUS_CONFIG: Record<
   TSubmitStatus,
   {
@@ -24,36 +43,8 @@ const STATUS_CONFIG: Record<
     icon: React.ReactNode
   }
 > = {
-  submitted: {
-    title: 'Exam Submitted Successfully',
-    description:
-      'Your responses have been saved and will be reviewed by our team.',
-    points: [
-      'We will evaluate your answers and reach out with the next steps.',
-      'You can safely close this window—no further action is required.'
-    ],
-    accent: 'bg-emerald-100 text-emerald-600',
-    icon: (
-      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-emerald-100 text-emerald-600">
-        <CheckCircle2 className="h-6 w-6" />
-      </div>
-    )
-  },
-  auto_submitted: {
-    title: 'Exam Auto-Submitted',
-    description:
-      'Time expired and your attempt was auto-submitted with your latest answers.',
-    points: [
-      'Everything you completed before the timer ended has been captured.',
-      'Our team will review your responses and follow up shortly.'
-    ],
-    accent: 'bg-indigo-100 text-indigo-600',
-    icon: (
-      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-indigo-100 text-indigo-600">
-        <Clock className="h-6 w-6" />
-      </div>
-    )
-  },
+  submitted: SUCCESS_CONFIG,
+  auto_submitted: SUCCESS_CONFIG,
   terminated: {
     title: 'Exam Terminated',
     description:
@@ -62,10 +53,13 @@ const STATUS_CONFIG: Record<
       'Your progress up to the point of termination has been recorded.',
       'Contact the assessment team if you believe this was in error.'
     ],
-    accent: 'bg-amber-100 text-amber-700',
+    accent: 'bg-[#EF4444]/20 text-[#EF4444]',
     icon: (
-      <div className="flex h-12 w-12 items-center justify-center rounded-full bg-amber-100 text-amber-600">
-        <AlertTriangle className="h-6 w-6" />
+      <div className="flex size-16 items-center justify-center">
+        <iframe
+          src="https://lottie.host/embed/851a187b-2044-43dc-a507-4b4f86628cf7/lK9ppwmD6l.lottie"
+          style={{ width: '58px', height: '58px', border: 'none' }}
+        />
       </div>
     )
   }
@@ -78,17 +72,39 @@ const SubmitPageShell = ({
   title: string
   description: string
 }) => (
-  <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-16">
-    <Card className="w-full max-w-xl rounded-3xl border border-slate-100 shadow-sm">
-      <CardHeader className="space-y-2 px-8 pt-10 text-center">
-        <CardTitle className="text-2xl font-semibold text-slate-800">
-          {title}
-        </CardTitle>
-        <CardDescription className="text-base text-slate-500">
-          {description}
-        </CardDescription>
-      </CardHeader>
-    </Card>
+  <div className="relative flex min-h-screen flex-col overflow-hidden bg-[#07080A]">
+    <div className="absolute inset-0 z-0 size-full">
+      <Image
+        fill
+        priority
+        alt="Background"
+        src="/hero-background.svg"
+        style={{ objectFit: 'cover' }}
+      />
+    </div>
+
+    <div className="relative z-10 flex min-h-screen flex-col items-center justify-center px-4 py-8">
+      <div className="mb-8 flex items-center">
+        <Image
+          alt="Prodgain Logo"
+          height={120}
+          src="/prodgain-wordmark-light.svg"
+          width={120}
+          priority
+        />
+      </div>
+
+      <Card className="w-full max-w-2xl overflow-hidden rounded-xl border border-white/10 bg-[#0E0D17] shadow-2xl">
+        <CardHeader className="space-y-2 px-8 py-10 text-center md:px-12 md:py-12">
+          <CardTitle className="text-2xl font-semibold tracking-tight text-white">
+            {title}
+          </CardTitle>
+          <CardDescription className="text-base text-[#A3A1B0]">
+            {description}
+          </CardDescription>
+        </CardHeader>
+      </Card>
+    </div>
   </div>
 )
 
@@ -102,32 +118,77 @@ function SubmitPageContent() {
     : 'submitted') as keyof typeof STATUS_CONFIG
 
   const statusInfo = STATUS_CONFIG[status]
+  const isSuccess = status !== 'terminated'
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-50 px-4 py-16">
-      <Card className="w-full max-w-xl space-y-6 rounded-3xl border border-slate-100 bg-white shadow-sm">
-        <CardHeader className="space-y-4 px-8 pt-10 text-center">
-          <div className="flex justify-center">{statusInfo.icon}</div>
-          <CardTitle className="text-[1.75rem] font-semibold text-slate-900">
-            {statusInfo.title}
-          </CardTitle>
-          <CardDescription className="text-base text-slate-500">
-            {statusInfo.description}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4 px-8 pb-10">
-          <div className="space-y-3 rounded-lg bg-slate-50 p-5 text-left text-sm text-slate-600">
-            {statusInfo.points.map((text, index) => (
-              <div key={index} className="flex items-start gap-3">
-                <span
-                  className={`mt-1 h-2.5 w-2.5 flex-shrink-0 rounded-full ${statusInfo.accent}`}
-                />
-                <p>{text}</p>
+    <div className="relative flex min-h-screen flex-col overflow-hidden bg-[#07080A]">
+      <div className="absolute inset-0 z-0 size-full">
+        <Image
+          fill
+          priority
+          alt="Background"
+          src="/hero-background.svg"
+          style={{ objectFit: 'cover' }}
+        />
+      </div>
+
+      <div className="relative z-10 flex min-h-screen flex-col items-center justify-center px-4 py-8">
+        <div className="mb-8 flex items-center">
+          <Image
+            alt="Prodgain Logo"
+            height={120}
+            src="/prodgain-wordmark-light.svg"
+            width={120}
+            priority
+          />
+        </div>
+
+        <Card className="w-full max-w-2xl overflow-hidden rounded-xl border border-white/10 bg-[#0E0D17] shadow-2xl">
+          <div className="px-8 py-10 md:px-12 md:py-12">
+            <div className="flex flex-col items-center text-center">
+              <div className="mb-5">{statusInfo.icon}</div>
+
+              <h1 className="text-2xl font-semibold tracking-tight text-white">
+                {statusInfo.title}
+              </h1>
+
+              <p className="mt-3 text-base text-[#A3A1B0]">
+                {statusInfo.description}
+              </p>
+
+              <div className="mt-8 w-full space-y-3 rounded-lg border border-white/5 bg-gradient-to-br from-white/[0.02] to-white/[0.01] p-6 text-left">
+                <div className="mb-4 flex items-center gap-2">
+                  <div className={`h-1.5 w-1.5 rounded-full ${isSuccess ? 'bg-[#10B981]' : 'bg-[#EF4444]'}`} />
+                  <p className="text-xs font-medium uppercase tracking-wide text-[#A3A1B0]">
+                    Important Information
+                  </p>
+                </div>
+
+                <div className="space-y-3">
+                  {statusInfo.points.map((text, index) => (
+                    <div key={index} className="flex items-start gap-3">
+                      <div className="mt-1.5 flex h-1 w-1 shrink-0 rounded-full bg-white/40" />
+                      <p className="text-sm leading-relaxed text-[#E5E5E5]">{text}</p>
+                    </div>
+                  ))}
+                </div>
               </div>
-            ))}
+
+              {isSuccess && (
+                <div className="mt-6 rounded-lg border border-[#10B981]/20 bg-[#10B981]/5 px-4 py-3">
+                  <p className="text-sm text-[#10B981]">
+                    Thank you for completing the assessment. We appreciate your time and effort.
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
-        </CardContent>
-      </Card>
+        </Card>
+
+        <p className="mt-6 text-sm text-[#A3A1B0]">
+          You can safely close this window
+        </p>
+      </div>
     </div>
   )
 }

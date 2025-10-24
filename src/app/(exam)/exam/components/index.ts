@@ -1,4 +1,5 @@
 export { AttemptErrorState } from './attempt-error-state'
+export { ExamHeader } from './exam-header'
 export { ExamLayout } from './exam-layout'
 export type { ExamLayoutProps } from './exam-layout'
 export { MissingCandidateNotice } from './missing-candidate-notice'

@@ -36,18 +36,18 @@ export const SubmitConfirmationDialog = ({
             <AlertDialogContent className="sm:max-w-md">
                 <AlertDialogHeader>
                     <div className="flex items-center gap-3">
-                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-amber-100">
-                            <AlertTriangle className="h-6 w-6 text-amber-600" />
+                        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-destructive/20">
+                            <AlertTriangle className="h-6 w-6 text-destructive" />
                         </div>
                         <div>
-                            <AlertDialogTitle className="text-lg font-semibold text-gray-900">
+                            <AlertDialogTitle className="text-lg font-semibold text-foreground">
                                 Submit Assessment
                             </AlertDialogTitle>
                         </div>
                     </div>
                 </AlertDialogHeader>
 
-                <AlertDialogDescription className="text-sm text-gray-600 leading-relaxed">
+                <AlertDialogDescription className="text-sm text-muted-foreground leading-relaxed">
                     Are you sure you want to submit your assessment? Once submitted, you will not be able to make any changes to your answers.
                 </AlertDialogDescription>
 
@@ -61,11 +61,11 @@ export const SubmitConfirmationDialog = ({
                     <AlertDialogAction
                         onClick={handleConfirm}
                         disabled={isSubmitPending}
-                        className="h-10 gap-2 bg-blue-600 px-6 text-sm font-semibold text-white hover:bg-blue-700 disabled:opacity-50"
+                        className="h-10 gap-2 bg-primary px-6 text-sm font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
                     >
                         {isSubmitPending ? (
                             <>
-                                <div className="h-4 w-4 animate-spin rounded-full border-2 border-white/30 border-t-white" />
+                                <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary-foreground/30 border-t-primary-foreground" />
                                 Submitting...
                             </>
                         ) : (

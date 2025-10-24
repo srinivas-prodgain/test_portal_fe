@@ -4,11 +4,11 @@ import type { Dispatch, SetStateAction } from 'react'
 
 import type { TQuestion } from '@/types/exam'
 
+import { ExamHeader } from './exam-header'
 import { QuestionPanel } from './question-panel'
 import { ViolationWarningDialog } from './violation-warning-dialog'
 
 export type ExamLayoutProps = {
-  statusLabel: string
   timeRemainingLabel: string
   currentQuestionIndex: number
   questionsCount: number
@@ -28,7 +28,6 @@ export type ExamLayoutProps = {
 }
 
 export const ExamLayout = ({
-  statusLabel,
   timeRemainingLabel,
   currentQuestionIndex,
   questionsCount,
@@ -47,7 +46,9 @@ export const ExamLayout = ({
   violationCount
 }: ExamLayoutProps) => {
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
+      <ExamHeader />
+
       <div className="relative mx-auto w-full max-w-7xl flex-1 px-2 py-3 sm:px-4 sm:py-4 lg:px-6 lg:py-6">
         <main className="flex flex-col h-full">
           <QuestionPanel
@@ -60,7 +61,6 @@ export const ExamLayout = ({
             onAnswerChange={onAnswerChange}
             onMove={onMove}
             onFinish={onFinish}
-            statusLabel={statusLabel}
             timeRemainingLabel={timeRemainingLabel}
             attemptStartTime={attemptStartTime}
             attemptEndTime={attemptEndTime}

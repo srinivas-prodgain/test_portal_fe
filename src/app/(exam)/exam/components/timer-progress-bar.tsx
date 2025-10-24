@@ -32,14 +32,14 @@ export const TimerProgressBar = ({
     // Calculate progress as percentage of time REMAINING (starts at 100%, goes to 0%)
     const remainingPercentage = Math.max(0, Math.min(100, (timeRemaining / totalDuration) * 100))
 
-    let colorClass = 'bg-green-600' // Default green
+    let colorClass = 'bg-accent' // Default accent
     let shouldBlink = false
 
     if (remainingPercentage <= 10) {
-      colorClass = 'bg-red-600'
+      colorClass = 'bg-destructive'
       shouldBlink = true
     } else if (remainingPercentage <= 25) {
-      colorClass = 'bg-amber-500'
+      colorClass = 'bg-primary'
       shouldBlink = false
     }
 
@@ -51,7 +51,7 @@ export const TimerProgressBar = ({
   }, [startTime, endTime, currentTime])
 
   return (
-    <div className="h-2 w-full bg-gray-200 rounded-full overflow-hidden">
+    <div className="h-2 w-full bg-muted rounded-full overflow-hidden">
       <div
         className={`h-full transition-all duration-75 ease-linear ${colorClass} ${shouldBlink ? 'animate-pulse' : ''
           }`}

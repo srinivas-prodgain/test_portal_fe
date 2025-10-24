@@ -3,9 +3,11 @@
 import { useCallback, useEffect } from 'react'
 
 export const useFullscreenGuard = ({
-  isActive
+  isActive,
+  onFullscreenExit
 }: {
   isActive: boolean
+  onFullscreenExit?: () => void
 }): {
   requestFullscreen: () => Promise<void>
 } => {
@@ -27,8 +29,13 @@ export const useFullscreenGuard = ({
     }
 
     const handleChange = () => {
+      console.log('[FULLSCREEN] Change event - isFullscreen:', !!document.fullscreenElement)
       if (!document.fullscreenElement) {
-        // Automatically re-enter fullscreen when user exits
+        console.log('[FULLSCREEN] User exited fullscreen - calling violation handler')
+        // Call the violation handler FIRST before re-entering fullscreen
+        onFullscreenExit?.()
+        console.log('[FULLSCREEN] Re-entering fullscreen')
+        // Then automatically re-enter fullscreen
         void requestFullscreen()
       }
     }
@@ -38,7 +45,7 @@ export const useFullscreenGuard = ({
     return () => {
       document.removeEventListener('fullscreenchange', handleChange)
     }
-  }, [isActive, requestFullscreen])
+  }, [isActive, requestFullscreen, onFullscreenExit])
 
   return {
     requestFullscreen

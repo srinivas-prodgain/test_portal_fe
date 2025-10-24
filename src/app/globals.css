@@ -1,70 +1,5 @@
-@import 'tailwindcss';
-@import 'tw-animate-css';
-
-@custom-variant dark (&:is(.dark *));
-
-@theme {
-  /* Sales OS Design System - Theme Configuration */
-  --font-family-roobert:
-    'Roobert', 'Inter', system-ui, -apple-system, BlinkMacSystemFont,
-    'Segoe UI', 'Roboto', sans-serif;
-  --font-family-sans:
-    'Roobert', 'Inter', system-ui, -apple-system, BlinkMacSystemFont,
-    'Segoe UI', 'Roboto', sans-serif;
-
-  --font-size-xxs: 0.625rem;
-  --line-height-xxs: 0.75rem;
-
-  --radius: 0.5rem;
-  --radius-lg: var(--radius);
-  --radius-md: calc(var(--radius) - 0.125rem);
-  --radius-sm: calc(var(--radius) - 0.25rem);
-
-  /* Sales OS Colors */
-  --color-background: hsl(var(--background));
-  --color-foreground: hsl(var(--foreground));
-  --color-card: hsl(var(--card));
-  --color-card-foreground: hsl(var(--card-foreground));
-  --color-popover: hsl(var(--popover));
-  --color-popover-foreground: hsl(var(--popover-foreground));
-  --color-primary: hsl(var(--primary));
-  --color-primary-foreground: hsl(var(--primary-foreground));
-  --color-primary-dark: hsl(var(--primary-dark));
-  --color-secondary: hsl(var(--secondary));
-  --color-secondary-foreground: hsl(var(--secondary-foreground));
-  --color-muted: hsl(var(--muted));
-  --color-muted-foreground: hsl(var(--muted-foreground));
-  --color-accent: hsl(var(--accent));
-  --color-accent-foreground: hsl(var(--accent-foreground));
-  --color-destructive: hsl(var(--destructive));
-  --color-destructive-foreground: hsl(var(--destructive-foreground));
-  --color-border: hsl(var(--border));
-  --color-input: hsl(var(--input));
-  --color-ring: hsl(var(--ring));
-  --color-chart-1: hsl(var(--chart-1));
-  --color-chart-2: hsl(var(--chart-2));
-  --color-chart-3: hsl(var(--chart-3));
-  --color-chart-4: hsl(var(--chart-4));
-  --color-chart-5: hsl(var(--chart-5));
-
-  /* Animation Durations */
-  --animate-accordion-down: accordion-down 0.2s ease-out;
-  --animate-accordion-up: accordion-up 0.2s ease-out;
-  --animate-spotlight: spotlight 2s ease 0.75s 1 forwards;
-  --animate-scroll: scroll var(--animation-duration, 40s)
-    var(--animation-direction, forwards) linear infinite;
-  --animate-bounce: bounce 1s infinite;
-  --animate-fade-in-up: fadeInUp 0.5s ease-out;
-  --animate-shiny-text: shiny-text 3s linear infinite;
-  --animate-expand-width: expandWidth 0.3s ease-out;
-  --animate-fade-in: fadeIn 0.5s ease-out;
-}
-
-/* Sales OS Design System - Font Face Declarations */
-/* 
-Note: Roobert font files need to be added to src/assets/fonts/ directory
-Uncomment and update paths when font files are available:
-
+/* Uncomment these font-face declarations after adding Roobert font files to src/assets/fonts/ */
+/*
 @font-face {
   font-family: 'Roobert';
   src: url('../assets/fonts/roobert-400.otf') format('opentype');
@@ -101,217 +36,161 @@ Uncomment and update paths when font files are available:
 }
 */
 
-/* Sales OS Design System - Light Theme Colors */
-:root {
-  /* Background & Foreground */
+@import "tailwindcss";
+
+@theme {
+  --color-background: hsl(0 0% 98%);
   /* #FAFAFA */
+  --color-foreground: hsl(246 28% 7%);
   /* #0E0D17 */
 
-  /* Card Colors */
-  --card: oklch(1 0 0);
+  --color-card: hsl(0 0% 100%);
   /* #FFFFFF */
-  --card-foreground: oklch(0.145 0 0);
+  --color-card-foreground: hsl(240 10% 3.9%);
   /* #090A0C */
 
-  /* Popover Colors */
-  --popover: oklch(1 0 0);
+  --color-popover: hsl(0 0% 100%);
   /* #FFFFFF */
-  --popover-foreground: oklch(0.145 0 0);
+  --color-popover-foreground: hsl(240 10% 3.9%);
   /* #090A0C */
 
-  /* Primary Colors */
-  --primary: oklch(0.205 0 0);
+  --color-primary: hsl(254 95% 60%);
   /* #6337FA */
-  --primary-foreground: oklch(0.985 0 0);
+  --color-primary-foreground: hsl(0 0% 98%);
   /* #FAFAFA */
-  --primary-dark: 256 55% 23%;
+  --color-primary-dark: hsl(256 55% 23%);
   /* #2C1B5C */
 
-  /* Secondary Colors */
-  --secondary: oklch(0.97 0 0);
+  --color-secondary: hsl(255 60% 37%);
   /* #422698 */
-  --secondary-foreground: oklch(0.205 0 0);
+  --color-secondary-foreground: hsl(0 0% 98%);
   /* #FAFAFA */
 
-  /* Muted Colors */
-  --muted: oklch(0.97 0 0);
+  --color-muted: hsl(240 4.8% 95.9%);
   /* #F4F3F9 */
-  --muted-foreground: oklch(0.556 0 0);
+  --color-muted-foreground: hsl(240 3.8% 46.1%);
   /* #757185 */
 
-  /* Accent Colors */
-  --accent: oklch(0.97 0 0);
+  --color-accent: hsl(264 100% 71%);
   /* #A86DFF */
-  --accent-foreground: oklch(0.205 0 0);
+  --color-accent-foreground: hsl(240 5.9% 10%);
   /* #090A0C */
 
-  /* Destructive Colors */
-  --destructive: oklch(0.577 0.245 27.325);
+  --color-destructive: hsl(0 84.2% 60.2%);
   /* #E93D3D */
-  --destructive-foreground: 0 0% 98%;
+  --color-destructive-foreground: hsl(0 0% 98%);
   /* #FAFAFA */
 
-  /* Border & Input */
-  --border: oklch(0.922 0 0);
+  --color-border: hsl(240 5.9% 90%);
   /* #E6E5EB */
-  --input: oklch(0.922 0 0);
+  --color-input: hsl(240 5.9% 90%);
   /* #E6E5EB */
-  --ring: oklch(0.708 0 0);
+  --color-ring: hsl(240 10% 3.9%);
   /* #090A0C */
 
-  /* Chart Colors */
-  --chart-1: oklch(0.646 0.222 41.116);
+  --color-chart-1: hsl(12 76% 61%);
   /* #E85D45 */
-  --chart-2: oklch(0.6 0.118 184.704);
+  --color-chart-2: hsl(173 58% 39%);
   /* #2F9E98 */
-  --chart-3: oklch(0.398 0.07 227.392);
+  --color-chart-3: hsl(197 37% 24%);
   /* #264B57 */
-  --chart-4: oklch(0.828 0.189 84.429);
+  --color-chart-4: hsl(43 74% 66%);
   /* #EBC244 */
-  --chart-5: oklch(0.769 0.188 70.08);
+  --color-chart-5: hsl(27 87% 67%);
   /* #F87F3B */
 
-  /* Sidebar Colors */
-  --sidebar-background: 0 0% 98%;
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
-
-  /* Border Radius */
-  --radius: 0.625rem;
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --sidebar: oklch(0.985 0 0);
+  --radius-base: 0.5rem;
+  --radius-lg: var(--radius-base);
+  --radius-md: calc(var(--radius-base) - 2px);
+  --radius-sm: calc(var(--radius-base) - 4px);
 }
 
-/* Sales OS Design System - Dark Theme Colors */
-.dark {
-  /* Background & Foreground */
-  --background: oklch(0.145 0 0);
-  /* #0E0D17 */
-  --foreground: oklch(0.985 0 0);
-  /* #FAFAFA */
-
-  /* Card Colors */
-  --card: oklch(0.205 0 0);
-  /* #090A12 */
-  --card-foreground: oklch(0.985 0 0);
-  /* #FAFAFA */
-
-  /* Popover Colors */
-  --popover: oklch(0.205 0 0);
-  /* #090A12 */
-  --popover-foreground: oklch(0.985 0 0);
-  /* #FAFAFA */
-
-  /* Primary Colors (same as light) */
-  --primary: oklch(0.922 0 0);
-  /* #6337FA */
-  --primary-foreground: oklch(0.205 0 0);
-  /* #FAFAFA */
-  --primary-dark: 256 55% 23%;
-  /* #2C1B5C */
-
-  /* Secondary Colors */
-  --secondary: oklch(0.269 0 0);
-  /* #422698 */
-  --secondary-foreground: oklch(0.985 0 0);
-  /* #FAFAFA */
-
-  /* Muted Colors */
-  --muted: oklch(0.269 0 0);
-  /* #282631 */
-  --muted-foreground: oklch(0.708 0 0);
-  /* #A3A1B0 */
-
-  /* Accent Colors */
-  --accent: oklch(0.269 0 0);
-  /* #282631 */
-  --accent-foreground: oklch(0.985 0 0);
-  /* #FAFAFA */
-
-  /* Destructive Colors */
-  --destructive: oklch(0.704 0.191 22.216);
-  /* #7E1D1D */
-  --destructive-foreground: 0 0% 98%;
-  /* #FAFAFA */
-
-  /* Border & Input */
-  --border: oklch(1 0 0 / 10%);
-  /* #282631 */
-  --input: oklch(1 0 0 / 15%);
-  /* #282631 */
-  --ring: oklch(0.556 0 0);
-  /* #D4D4D8 */
-
-  /* Chart Colors (Dark Theme) */
-  --chart-1: oklch(0.488 0.243 264.376);
-  /* #3B7CD6 */
-  --chart-2: oklch(0.696 0.17 162.48);
-  /* #39A785 */
-  --chart-3: oklch(0.769 0.188 70.08);
-  /* #E69B3A */
-  --chart-4: oklch(0.627 0.265 303.9);
-  /* #9F5DC8 */
-  --chart-5: oklch(0.645 0.246 16.439);
-  /* #E14B89 */
-
-  /* Sidebar Colors (Dark) */
-  --sidebar-background: 240 5.9% 10%;
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
-  --sidebar: oklch(0.205 0 0);
-}
-
-/* Sales OS Design System - Custom Animations */
-@keyframes accordion-down {
-  from {
-    height: 0;
+@layer base {
+  :root {
+    color-scheme: light;
   }
 
-  to {
-    height: var(--radix-accordion-content-height);
+  .dark {
+    color-scheme: dark;
+    --color-background: hsl(246 28% 7%);
+    /* #0E0D17 */
+    --color-foreground: hsl(0 0% 98%);
+    /* #FAFAFA */
+
+    --color-card: hsl(240 10% 3.9%);
+    /* #090A12 */
+    --color-card-foreground: hsl(0 0% 98%);
+    /* #FAFAFA */
+
+    --color-popover: hsl(240 10% 3.9%);
+    /* #090A12 */
+    --color-popover-foreground: hsl(0 0% 98%);
+    /* #FAFAFA */
+
+    --color-primary: hsl(254 95% 60%);
+    /* #6337FA */
+    --color-primary-foreground: hsl(0 0% 98%);
+    /* #FAFAFA */
+    --color-primary-dark: hsl(256 55% 23%);
+    /* #2C1B5C */
+
+    --color-secondary: hsl(255 60% 37%);
+    /* #422698 */
+    --color-secondary-foreground: hsl(0 0% 98%);
+    /* #FAFAFA */
+
+    --color-muted: hsl(240 3.7% 15.9%);
+    /* #282631 */
+    --color-muted-foreground: hsl(240 5% 64.9%);
+    /* #A3A1B0 */
+
+    --color-accent: hsl(240 3.7% 15.9%);
+    /* #282631 */
+    --color-accent-foreground: hsl(0 0% 98%);
+    /* #FAFAFA */
+
+    --color-destructive: hsl(0 62.8% 30.6%);
+    /* #7E1D1D */
+    --color-destructive-foreground: hsl(0 0% 98%);
+    /* #FAFAFA */
+
+    --color-border: hsl(240 3.7% 15.9%);
+    /* #282631 */
+    --color-input: hsl(240 3.7% 15.9%);
+    /* #282631 */
+    --color-ring: hsl(240 4.9% 83.9%);
+    /* #D4D4D8 */
+
+    --color-chart-1: hsl(220 70% 50%);
+    /* #3B7CD6 */
+    --color-chart-2: hsl(160 60% 45%);
+    /* #39A785 */
+    --color-chart-3: hsl(30 80% 55%);
+    /* #E69B3A */
+    --color-chart-4: hsl(280 65% 60%);
+    /* #9F5DC8 */
+    --color-chart-5: hsl(340 75% 55%);
+    /* #E14B89 */
   }
 }
 
-@keyframes accordion-up {
-  from {
-    height: var(--radix-accordion-content-height);
+@layer base {
+  * {
+    border-color: var(--color-border);
   }
 
-  to {
-    height: 0;
-  }
-}
-
-@keyframes spotlight {
-  0% {
-    opacity: 0;
-    transform: translate(-72%, -62%) scale(0.5);
-  }
-
-  100% {
-    opacity: 1;
-    transform: translate(-50%, -40%) scale(1);
-  }
-}
-
-@keyframes scroll {
-  to {
-    transform: translate(calc(-50% - 1rem));
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: 'Roobert', 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif;
+    min-height: 100vh;
+    width: 100%;
+    overscroll-behavior-y: none;
   }
 }
 
 @keyframes bounce {
+
   0%,
   80%,
   100% {
@@ -319,20 +198,39 @@ Uncomment and update paths when font files are available:
   }
 
   40% {
-    transform: translateY(-0.375rem);
+    transform: translateY(-6px);
   }
 }
 
 @keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(0.625rem);
+    transform: translateY(10px);
   }
 
   to {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+.animate-fade-in-up {
+  animation: fadeInUp 0.3s ease-out forwards;
+}
+
+::-webkit-scrollbar {
+  width: 4px;
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--color-muted-foreground) 50%, transparent);
+  border-radius: 5px;
+}
+
+.overflow-wrap-anywhere {
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 @keyframes shiny-text {
@@ -345,71 +243,11 @@ Uncomment and update paths when font files are available:
   }
 }
 
-@keyframes expandWidth {
-  from {
-    width: 0;
-    opacity: 0;
-  }
-
-  to {
-    width: 100%;
-    opacity: 1;
-  }
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(0.625rem);
-  }
-
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-/* Base Styles */
-* {
-  border-color: hsl(var(--border));
-}
-
-body {
-  background: hsl(var(--background));
-  color: hsl(var(--foreground));
-  font-family:
-    'Roobert',
-    'Inter',
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    'Segoe UI',
-    'Roboto',
-    sans-serif;
-  font-feature-settings:
-    'rlig' 1,
-    'calt' 1;
-}
-
-/* Custom Scrollbar Styling */
-::-webkit-scrollbar {
-  width: 0.25rem;
-  background: transparent;
-}
-
-::-webkit-scrollbar-thumb {
-  background: #c5c5c5;
-  border-radius: 0.3125rem;
-}
-
-/* Shiny Text Effect */
 .animate-shiny-text {
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(0, 0, 0, 0.8),
-    transparent
-  );
+  background: linear-gradient(90deg,
+      transparent,
+      color-mix(in srgb, var(--color-foreground) 80%, transparent),
+      transparent);
   background-size: 200% 100%;
   background-clip: text;
   -webkit-background-clip: text;
@@ -417,55 +255,40 @@ body {
   animation: shiny-text 3s linear infinite;
 }
 
-/* Custom Utilities */
-.overflow-wrap-anywhere {
-  overflow-wrap: anywhere;
-  word-break: break-word;
+.recharts-wrapper * {
+  outline: none !important;
 }
 
-@theme inline {
-  --radius-sm: calc(var(--radius) - 0.25rem);
-  --radius-md: calc(var(--radius) - 0.125rem);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 0.25rem);
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-card: var(--card);
-  --color-card-foreground: var(--card-foreground);
-  --color-popover: var(--popover);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-primary: var(--primary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-secondary: var(--secondary);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-muted: var(--muted);
-  --color-muted-foreground: var(--muted-foreground);
-  --color-accent: var(--accent);
-  --color-accent-foreground: var(--accent-foreground);
-  --color-destructive: var(--destructive);
-  --color-border: var(--border);
-  --color-input: var(--input);
-  --color-ring: var(--ring);
-  --color-chart-1: var(--chart-1);
-  --color-chart-2: var(--chart-2);
-  --color-chart-3: var(--chart-3);
-  --color-chart-4: var(--chart-4);
-  --color-chart-5: var(--chart-5);
-  --color-sidebar: var(--sidebar);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-ring: var(--sidebar-ring);
-}
-
-@layer base {
-  * {
-    @apply border-border outline-ring/50;
+@layer utilities {
+  .animate-expand-width {
+    animation: expandWidth 0.3s ease-out forwards;
   }
-  body {
-    @apply bg-background text-foreground;
+
+  .animate-fadeIn {
+    animation: fadeIn 0.5s ease-out forwards;
+  }
+
+  @keyframes expandWidth {
+    from {
+      width: 0;
+      opacity: 0;
+    }
+
+    to {
+      width: 100%;
+      opacity: 1;
+    }
+  }
+
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
   }
 }

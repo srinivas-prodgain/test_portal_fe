@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { useRouter } from 'next/navigation'
+import Image from 'next/image'
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import { AxiosError } from 'axios'
@@ -16,10 +17,8 @@ import { Button } from '@/components/ui/button'
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
-  CardHeader,
-  CardTitle
+  CardHeader
 } from '@/components/ui/card'
 import {
   Form,
@@ -110,151 +109,242 @@ export default function CandidateIntakePage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-100 px-4 py-12">
-      <div className="w-full max-w-xl space-y-6">
-        <Card className="rounded-3xl border !border-slate-300 shadow-sm">
-          <CardHeader className="space-y-2 px-8 pt-8">
-            <CardTitle className="text-2xl font-semibold text-slate-900">
-              Your Information
-            </CardTitle>
-            <CardDescription className="text-base text-slate-500">
-              All fields are required except where noted
-            </CardDescription>
-          </CardHeader>
+    <div className="relative flex min-h-screen flex-col overflow-hidden bg-[#07080A]">
+      <div className="absolute inset-0 z-0 size-full">
+        <Image
+          fill
+          priority
+          alt="Background"
+          src="/hero-background.svg"
+          style={{ objectFit: 'cover' }}
+        />
+      </div>
 
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)}>
-              <CardContent className="space-y-6 px-8 pb-2 pt-2">
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem className="space-y-2 bg-white">
-                      <FormLabel className="text-sm font-medium text-slate-700">
-                        Email Address
-                      </FormLabel>
-                      <FormControl>
-                        <div className="flex items-center gap-3 rounded-lg bg-white border !border-slate-300 px-4">
-                          <Mail className="h-4 w-4 text-slate-400 " />
-                          <Input
-                            type="email"
-                            placeholder="you@example.com"
-                            autoComplete="email"
-                            className="h-12 border-0 pl-0 bg-transparent text-base focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none"
-                            {...field}
-                          />
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+      <div className="relative z-10 flex min-h-screen items-center justify-center px-4 py-8">
+        <Card className="w-full max-w-5xl overflow-hidden rounded-xl border border-white/10 bg-[#0E0D17] text-white shadow-2xl">
+          <div className="grid md:grid-cols-2">
+            {/* Left Side - Information */}
+            <div className="flex flex-col justify-between border-r border-white/5 bg-gradient-to-br from-[#0E0D17] to-[#1A1828] p-8 md:p-10">
+              <div className="space-y-8">
+                <div className="flex items-center">
+                  <Image
+                    alt="Logo"
+                    height={140}
+                    src="/prodgain-wordmark-light.svg"
+                    width={140}
+                  />
+                </div>
 
-                <FormField
-                  control={form.control}
-                  name="linkedinProfileUrl"
-                  render={({ field }) => (
-                    <FormItem className="space-y-2">
-                      <FormLabel className="text-sm font-medium text-slate-700">
-                        LinkedIn Profile
-                      </FormLabel>
-                      <FormControl>
-                        <div className="flex items-center gap-3 rounded-lg border !border-slate-300 bg-white px-4">
-                          <Linkedin className="h-4 w-4 text-slate-400" />
-                          <Input
-                            placeholder="https://linkedin.com/in/username"
-                            className="h-12 border-0 pl-0 bg-transparent text-base focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none"
-                            {...field}
-                          />
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="githubProfileUrl"
-                  render={({ field }) => (
-                    <FormItem className="space-y-2">
-                      <FormLabel className="text-sm font-medium text-slate-700">
-                        GitHub Profile
-                      </FormLabel>
-                      <FormControl>
-                        <div className="flex items-center gap-3 rounded-lg border !border-slate-300 bg-white pl-4">
-                          <Github className="h-4 w-4 text-slate-400" />
-                          <Input
-                            placeholder="https://github.com/username"
-                            className="h-12 border-0 pl-0 bg-transparent text-base focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none"
-                            {...field}
-                          />
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={form.control}
-                  name="resume"
-                  render={({ field }) => (
-                    <FormItem className="space-y-2">
-                      <div className="flex items-center gap-2">
-                        <FormLabel className="text-sm font-medium text-slate-700">
-                          Resume
-                        </FormLabel>
-                        <span className="text-xs font-medium uppercase tracking-wide text-slate-400">
-                          Optional
-                        </span>
-                      </div>
-                      <FormControl>
-                        <div className="flex items-center gap-3 rounded-lg border !border-slate-300 bg-white px-4">
-                          <FileText className="h-4 w-4 text-slate-400" />
-                          <Input
-                            placeholder="Share a link to your resume"
-                            className="h-12 border-0 pl-0 bg-transparent text-base focus-visible:ring-0 focus-visible:ring-offset-0 shadow-none"
-                            {...field}
-                          />
-                        </div>
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                {form.formState.errors.root && (
-                  <div className="flex items-center gap-3 rounded-lg border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm text-destructive">
-                    <AlertCircle className="h-4 w-4" />
-                    {form.formState.errors.root.message}
+                <div className="space-y-6">
+                  <div>
+                    <h1 className="text-2xl font-semibold tracking-tight text-white">
+                      Technical Assessment
+                    </h1>
+                    <p className="mt-2 text-sm text-[#A3A1B0]">
+                      Showcase your skills and join our talent pool
+                    </p>
                   </div>
-                )}
-              </CardContent>
 
-              <CardFooter className="px-8 pb-8 pt-4">
-                <Button
-                  type="submit"
-                  disabled={isPending || isPreparingExam}
-                  className="flex h-12 w-full items-center justify-center gap-2 rounded-lg bg-violet-500 text-base font-semibold text-white shadow-sm transition hover:bg-violet-700 disabled:opacity-50 cursor-pointer"
-                >
-                  {isPending || isPreparingExam ? (
-                    <>
-                      <div className="h-5 w-5 animate-spin rounded-lg border-2 border-white/30 border-t-white" />
-                      {isPreparingExam ? 'Preparing your exam...' : 'Creating your session...'}
-                    </>
-                  ) : (
-                    <>
-                      Start Assessment
-                      <ArrowRight className="h-4 w-4" />
-                    </>
-                  )}
-                </Button>
-              </CardFooter>
-            </form>
-          </Form>
+                  <div className="space-y-4">
+                    <div className="flex gap-3">
+                      <div className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white/5">
+                        <span className="text-xs font-medium text-white">1</span>
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-medium text-white">Submit Your Details</h3>
+                        <p className="mt-1 text-sm text-[#A3A1B0]">
+                          Provide your professional profiles to help us understand your background
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-3">
+                      <div className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white/5">
+                        <span className="text-xs font-medium text-white">2</span>
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-medium text-white">Complete the Assessment</h3>
+                        <p className="mt-1 text-sm text-[#A3A1B0]">
+                          Answer technical questions in a monitored environment
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex gap-3">
+                      <div className="mt-1 flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-white/5">
+                        <span className="text-xs font-medium text-white">3</span>
+                      </div>
+                      <div>
+                        <h3 className="text-sm font-medium text-white">Get Evaluated</h3>
+                        <p className="mt-1 text-sm text-[#A3A1B0]">
+                          Our team will review your submission and reach out with next steps
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="mt-8 space-y-3 rounded-lg border border-white/5 bg-white/[0.02] p-4">
+                <p className="text-xs font-medium uppercase tracking-wide text-[#A3A1B0]">
+                  Important Guidelines
+                </p>
+                <ul className="space-y-2 text-sm text-[#A3A1B0]">
+                  <li className="flex gap-2">
+                    <span className="text-white">•</span>
+                    <span>Ensure stable internet connection</span>
+                  </li>
+                  <li className="flex gap-2">
+                    <span className="text-white">•</span>
+                    <span>Complete assessment in one session</span>
+                  </li>
+                </ul>
+              </div>
+            </div>
+
+            {/* Right Side - Form */}
+            <div className="flex flex-col p-8 md:p-10">
+              <div className="mb-6">
+                <h2 className="text-lg font-medium text-white">
+                  Enter your details to begin the assessment
+                </h2>
+              </div>
+
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-1 flex-col">
+                  <div className="flex-1 space-y-5">
+                    <FormField
+                      control={form.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="block text-sm">
+                            Email Address
+                          </FormLabel>
+                          <FormControl>
+                            <div className="flex items-center gap-3 rounded-md border border-[#282631] bg-transparent px-4 py-3">
+                              <Mail className="h-5 w-5 text-[#A3A1B0]" />
+                              <Input
+                                type="email"
+                                placeholder="you@example.com"
+                                autoComplete="email"
+                                className="h-full w-full border-0 bg-transparent px-0 text-base text-[#FAFAFA] placeholder:text-[#A3A1B0] focus-visible:ring-0 focus-visible:ring-offset-0 [&:-webkit-autofill]:bg-transparent [&:-webkit-autofill]:[-webkit-text-fill-color:#FAFAFA] [&:-webkit-autofill]:[-webkit-box-shadow:0_0_0_1000px_#0E0D17_inset]"
+                                {...field}
+                              />
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="linkedinProfileUrl"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="block text-sm">
+                            LinkedIn Profile
+                          </FormLabel>
+                          <FormControl>
+                            <div className="flex items-center gap-3 rounded-md border border-[#282631] bg-transparent px-4 py-3">
+                              <Linkedin className="h-5 w-5 text-[#A3A1B0]" />
+                              <Input
+                                placeholder="https://linkedin.com/in/username"
+                                className="h-full w-full border-0 bg-transparent px-0 text-base text-[#FAFAFA] placeholder:text-[#A3A1B0] focus-visible:ring-0 focus-visible:ring-offset-0 [&:-webkit-autofill]:bg-transparent [&:-webkit-autofill]:[-webkit-text-fill-color:#FAFAFA] [&:-webkit-autofill]:[-webkit-box-shadow:0_0_0_1000px_#0E0D17_inset]"
+                                {...field}
+                              />
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="githubProfileUrl"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="block text-sm">
+                            GitHub Profile
+                          </FormLabel>
+                          <FormControl>
+                            <div className="flex items-center gap-3 rounded-md border border-[#282631] bg-transparent px-4 py-3">
+                              <Github className="h-5 w-5 text-[#A3A1B0]" />
+                              <Input
+                                placeholder="https://github.com/username"
+                                className="h-full w-full border-0 bg-transparent px-0 text-base text-[#FAFAFA] placeholder:text-[#A3A1B0] focus-visible:ring-0 focus-visible:ring-offset-0 [&:-webkit-autofill]:bg-transparent [&:-webkit-autofill]:[-webkit-text-fill-color:#FAFAFA] [&:-webkit-autofill]:[-webkit-box-shadow:0_0_0_1000px_#0E0D17_inset]"
+                                {...field}
+                              />
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="resume"
+                      render={({ field }) => (
+                        <FormItem>
+                          <div className="flex items-center gap-2">
+                            <FormLabel className="block text-sm">
+                              Resume
+                            </FormLabel>
+                            <span className="text-xs font-medium uppercase tracking-wide text-[#A3A1B0]">
+                              Optional
+                            </span>
+                          </div>
+                          <FormControl>
+                            <div className="flex items-center gap-3 rounded-md border border-[#282631] bg-transparent px-4 py-3">
+                              <FileText className="h-5 w-5 text-[#A3A1B0]" />
+                              <Input
+                                placeholder="Share a link to your resume"
+                                className="h-full w-full border-0 bg-transparent px-0 text-base text-[#FAFAFA] placeholder:text-[#A3A1B0] focus-visible:ring-0 focus-visible:ring-offset-0 [&:-webkit-autofill]:bg-transparent [&:-webkit-autofill]:[-webkit-text-fill-color:#FAFAFA] [&:-webkit-autofill]:[-webkit-box-shadow:0_0_0_1000px_#0E0D17_inset]"
+                                {...field}
+                              />
+                            </div>
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    {form.formState.errors.root && (
+                      <div className="flex items-center gap-3 rounded-lg border border-destructive/20 bg-destructive/5 px-4 py-3 text-sm text-destructive">
+                        <AlertCircle className="h-4 w-4" />
+                        {form.formState.errors.root.message}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="mt-6">
+                    <Button
+                      type="submit"
+                      disabled={isPending || isPreparingExam}
+                      className="flex w-full items-center justify-center gap-2"
+                    >
+                      {isPending || isPreparingExam ? (
+                        <>
+                          {isPreparingExam ? 'Preparing your exam...' : 'Creating your session...'}
+                        </>
+                      ) : (
+                        <>
+                          Start Assessment
+                          <ArrowRight className="h-4 w-4" />
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </form>
+              </Form>
+            </div>
+          </div>
         </Card>
       </div>
     </div>
   )
 }
+

@@ -16,34 +16,34 @@ type AttemptErrorStateProps = {
 }
 
 export const AttemptErrorState = ({ message }: AttemptErrorStateProps) => (
-  <div className="min-h-screen bg-gradient-to-br from-red-50 via-white to-amber-50">
+  <div className="min-h-screen bg-gradient-to-br from-destructive/5 via-background to-destructive/10">
     <div className="flex min-h-screen flex-col items-center justify-center gap-6 px-4 py-6 sm:px-6 sm:py-8 text-center">
       <Card className="w-full max-w-lg border-0 shadow-xl">
         <CardHeader className="flex flex-col items-center gap-4 p-6 pb-6">
-          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-red-100">
-            <AlertTriangle className="h-8 w-8 text-red-600" />
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-destructive/20">
+            <AlertTriangle className="h-8 w-8 text-destructive" />
           </div>
           <div className="space-y-2">
-            <CardTitle className="text-2xl font-semibold text-red-900">
+            <CardTitle className="text-2xl font-semibold text-foreground">
               Assessment Setup Failed
             </CardTitle>
-            <CardDescription className="text-base text-red-700">
+            <CardDescription className="text-base text-muted-foreground">
               {message}
             </CardDescription>
           </div>
         </CardHeader>
-        
+
         <CardFooter className="flex flex-col gap-3 p-6 pt-0">
-          <Button 
-            onClick={() => window.location.reload()} 
+          <Button
+            onClick={() => window.location.reload()}
             className="w-full h-10 gap-2"
             variant="outline"
           >
             <RefreshCw className="h-4 w-4" />
             Try Again
           </Button>
-          <Button 
-            onClick={() => window.location.href = '/form1'} 
+          <Button
+            onClick={() => window.location.href = '/form1'}
             className="w-full h-10 gap-2"
           >
             <Home className="h-4 w-4" />
@@ -51,7 +51,7 @@ export const AttemptErrorState = ({ message }: AttemptErrorStateProps) => (
           </Button>
         </CardFooter>
       </Card>
-      
+
       <div className="text-sm text-muted-foreground">
         <p>If this problem persists, please contact support</p>
       </div>

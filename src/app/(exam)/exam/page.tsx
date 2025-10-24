@@ -26,8 +26,6 @@ import { useDevtoolsGuard } from '@/hooks/use-devtools-guard'
 import { useDisableCopyPaste } from '@/hooks/use-disable-copy-paste'
 import { useFullscreenGuard } from '@/hooks/use-fullscreen-guard'
 
-import { ACTIVE_STATUS_LABEL } from '@/constants/exam'
-
 import { ExamLayout, MissingCandidateNotice, SubmitConfirmationDialog } from './components'
 
 export const ExamPageContent = () => {
@@ -83,20 +81,6 @@ export const ExamPageContent = () => {
       answersCache
     }
   }, [attemptInfo, attemptStatus, currentQuestionIndex, currentAnswer, answersCache])
-
-  // Security Hooks
-  useDisableCopyPaste({ isActive: isAttemptActive })
-  useDevtoolsGuard({ isActive: isAttemptActive })
-  const { requestFullscreen } = useFullscreenGuard({
-    isActive: isAttemptActive
-  })
-
-  // Request fullscreen when exam starts
-  useEffect(() => {
-    if (attemptInfo && isAttemptActive) {
-      void requestFullscreen()
-    }
-  }, [attemptInfo, isAttemptActive, requestFullscreen])
 
   // Initialize answers cache from server data
   useEffect(() => {
@@ -158,14 +142,19 @@ export const ExamPageContent = () => {
   const handleViolation = useCallback(
     async (type: TViolationType): Promise<void> => {
       const { attemptInfo, attemptStatus, currentQuestionIndex, currentAnswer, answersCache } = stateRefs.current
+
+      console.log('[VIOLATION] Type:', type, 'Status:', attemptStatus, 'Processing:', isProcessingViolation)
+
       if (
         !attemptInfo?.attemptId ||
         attemptStatus !== 'running' ||
         isProcessingViolation
       ) {
+        console.log('[VIOLATION] Skipped - Guard condition failed')
         return
       }
 
+      console.log('[VIOLATION] Registering violation:', type)
       setIsProcessingViolation(true)
 
       try {
@@ -192,19 +181,23 @@ export const ExamPageContent = () => {
           answers: answersToSend
         })
 
+        console.log('[VIOLATION] Response:', response)
+
         // Update violation count in attempt info
         setAttempt((prev) =>
           prev ? { ...prev, violationCount: response.violationCount } : prev
         )
 
         if (response.action === 'warn') {
+          console.log('[VIOLATION] Showing warning dialog')
           setShowWarningDialog(true)
         } else if (response.action === 'terminate') {
+          console.log('[VIOLATION] Terminating attempt')
           setAttemptStatus('terminated')
           router.replace('/submit?status=terminated')
         }
       } catch (error) {
-        console.error('Failed to register violation:', error)
+        console.error('[VIOLATION] Failed to register violation:', error)
       } finally {
         setTimeout(() => setIsProcessingViolation(false), 1000)
       }
@@ -216,6 +209,26 @@ export const ExamPageContent = () => {
       router
     ]
   )
+
+  // Memoized fullscreen violation handler
+  const handleFullscreenViolation = useCallback(() => {
+    handleViolation('fullscreen')
+  }, [handleViolation])
+
+  // Security Hooks
+  useDisableCopyPaste({ isActive: isAttemptActive })
+  useDevtoolsGuard({ isActive: isAttemptActive })
+  const { requestFullscreen } = useFullscreenGuard({
+    isActive: isAttemptActive,
+    onFullscreenExit: handleFullscreenViolation
+  })
+
+  // Request fullscreen when exam starts
+  useEffect(() => {
+    if (attemptInfo && isAttemptActive) {
+      void requestFullscreen()
+    }
+  }, [attemptInfo, isAttemptActive, requestFullscreen])
 
   const handleWarningAcknowledge = async (): Promise<void> => {
     setShowWarningDialog(false)
@@ -277,12 +290,6 @@ export const ExamPageContent = () => {
     const handlers = {
       visibilitychange: () => document.hidden && handleViolation('window-blur'),
       blur: () => handleViolation('window-blur'),
-      fullscreenchange: () => {
-        // Track fullscreen exit as violation
-        if (!document.fullscreenElement) {
-          handleViolation('fullscreen')
-        }
-      },
       copy: (e: Event) => {
         e.preventDefault()
         // Only prevent copy, don't track as violation
@@ -296,7 +303,6 @@ export const ExamPageContent = () => {
 
     document.addEventListener('visibilitychange', handlers.visibilitychange)
     window.addEventListener('blur', handlers.blur)
-    document.addEventListener('fullscreenchange', handlers.fullscreenchange)
     document.addEventListener('copy', handlers.copy)
     document.addEventListener('paste', handlers.paste)
     document.addEventListener('contextmenu', handlers.contextmenu)
@@ -307,10 +313,6 @@ export const ExamPageContent = () => {
         handlers.visibilitychange
       )
       window.removeEventListener('blur', handlers.blur)
-      document.removeEventListener(
-        'fullscreenchange',
-        handlers.fullscreenchange
-      )
       document.removeEventListener('copy', handlers.copy)
       document.removeEventListener('paste', handlers.paste)
       document.removeEventListener('contextmenu', handlers.contextmenu)
@@ -330,7 +332,7 @@ export const ExamPageContent = () => {
 
     const handleRefreshShortcuts = (event: KeyboardEvent) => {
       const key = event.key.toLowerCase()
-      
+
       // Disable ESC key to prevent easy fullscreen exit
       if (event.key === 'Escape') {
         event.preventDefault()
@@ -424,15 +426,6 @@ export const ExamPageContent = () => {
   return (
     <>
       <ExamLayout
-        statusLabel={
-          attemptStatus === 'running'
-            ? ACTIVE_STATUS_LABEL
-            : attemptStatus === 'terminated'
-              ? 'Attempt terminated'
-              : attemptStatus === 'auto_submitted'
-                ? 'Attempt auto-submitted'
-                : 'Attempt submitted'
-        }
         timeRemainingLabel={timeRemainingLabel}
         currentQuestionIndex={currentQuestionIndex}
         questionsCount={questions.length}

@@ -36,33 +36,33 @@ export const ViolationWarningDialog = ({
 
   return (
     <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent className="max-w-md rounded-3xl border border-slate-100 bg-white shadow-xl">
+      <AlertDialogContent className="max-w-md rounded-3xl border bg-card shadow-xl">
         <AlertDialogHeader className="space-y-4">
-          <div className="flex items-center gap-3 rounded-lg bg-amber-50 px-3 py-2 text-amber-600">
+          <div className="flex items-center gap-3 rounded-lg bg-destructive/10 px-3 py-2 text-destructive">
             <AlertTriangle className="h-5 w-5" />
             <span className="text-sm font-semibold uppercase tracking-wide">
               Focus Required
             </span>
           </div>
-          <AlertDialogTitle className="text-xl font-semibold text-slate-900">
+          <AlertDialogTitle className="text-xl font-semibold text-card-foreground">
             You&apos;re Outside Exam Guidelines
           </AlertDialogTitle>
-          <AlertDialogDescription className="space-y-4 text-left text-sm leading-relaxed text-slate-600">
+          <AlertDialogDescription className="space-y-4 text-left text-sm leading-relaxed text-muted-foreground">
             <p>
-              We detected activity that breaks the assessment rules. This is warning {violationCount} of {MAX_WARNINGS_ALLOWED}. 
-              You have {remainingWarnings} warning{remainingWarnings !== 1 ? 's' : ''} remaining—any further violations after 
+              We detected activity that breaks the assessment rules. This is warning {violationCount} of {MAX_WARNINGS_ALLOWED}.
+              You have {remainingWarnings} warning{remainingWarnings !== 1 ? 's' : ''} remaining—any further violations after
               your final warning will end the exam immediately.
             </p>
             <div className="space-y-2">
-              <p className="text-sm font-semibold text-slate-700">
+              <p className="text-sm font-semibold text-foreground">
                 Avoid the following before continuing:
               </p>
-              <ul className="space-y-1.5 rounded-lg bg-slate-50 px-4 py-3 text-sm">
+              <ul className="space-y-1.5 rounded-lg bg-muted px-4 py-3 text-sm">
                 <li>• Leaving fullscreen or switching tabs/windows</li>
                 <li>• Opening developer tools or inspector panes</li>
               </ul>
             </div>
-            <div className="flex items-center gap-2 rounded-lg bg-emerald-50 px-3 py-2 text-emerald-600">
+            <div className="flex items-center gap-2 rounded-lg bg-accent/10 px-3 py-2 text-accent-foreground">
               <ShieldCheck className="h-5 w-5" />
               <span className="text-sm font-medium">
                 Stay focused in fullscreen mode to continue safely.
@@ -73,7 +73,7 @@ export const ViolationWarningDialog = ({
         <AlertDialogFooter>
           <AlertDialogAction
             onClick={handleAcknowledge}
-            className="w-full justify-center rounded-full bg-violet-600 text-sm font-semibold text-white hover:bg-violet-700"
+            className="w-full justify-center rounded-full bg-primary text-sm font-semibold text-primary-foreground hover:bg-primary/90"
           >
             I Understand
           </AlertDialogAction>
