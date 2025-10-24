@@ -7,6 +7,7 @@ import Image from 'next/image'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { AxiosError } from 'axios'
 import { useForm } from 'react-hook-form'
+import { useQueryClient } from '@tanstack/react-query'
 import { z } from 'zod'
 import { Mail, Linkedin, Github, FileText, ArrowRight, AlertCircle } from 'lucide-react'
 
@@ -16,9 +17,6 @@ import { useCreateCandidate, useCreateAttempt, useGetQuestions } from '@/hooks/a
 import { Button } from '@/components/ui/button'
 import {
   Card,
-  CardContent,
-  CardFooter,
-  CardHeader
 } from '@/components/ui/card'
 import {
   Form,
@@ -47,6 +45,7 @@ type CandidateFormValues = z.infer<typeof candidateFormSchema>
 
 export default function CandidateIntakePage() {
   const router = useRouter()
+  const queryClient = useQueryClient()
   const [isPreparingExam, setIsPreparingExam] = useState(false)
 
   const {
@@ -76,26 +75,43 @@ export default function CandidateIntakePage() {
         resume: data.resume || undefined
       }
 
-      // Step 1: Create candidate
-      const candidateResponse = await createCandidate(payload)
+      const candidateResponse = await createCandidate({ payload })
 
-      // Step 2: Prepare exam (create attempt and load questions in parallel)
       setIsPreparingExam(true)
 
       const [attemptResponse, questionsResponse] = await Promise.all([
-        createAttempt(candidateResponse.candidateId),
+        createAttempt({ candidateId: candidateResponse.candidateId }),
         fetchQuestions()
       ])
 
-      // Step 3: Only redirect when both are successful
-      if (attemptResponse && questionsResponse.data) {
+      const examDataReady = attemptResponse && questionsResponse.data
+
+      if (examDataReady) {
+        queryClient.setQueryData(
+          ['useGetAttempt', { candidateId: candidateResponse.candidateId }],
+          {
+            ...attemptResponse,
+            status: 'running',
+            violations: [],
+            answers: []
+          }
+        )
+
+        queryClient.setQueryData(
+          ['useGetQuestions', { enabled: true }],
+          questionsResponse.data
+        )
+
         setIsPreparingExam(false)
         router.replace(`/exam?candidate_id=${candidateResponse.candidateId}`)
       }
     } catch (error) {
       setIsPreparingExam(false)
 
-      if (error instanceof AxiosError && error.response?.status === 409) {
+      const isDuplicateCandidate =
+        error instanceof AxiosError && error.response?.status === 409
+
+      if (isDuplicateCandidate) {
         form.setError('root', {
           message: 'Candidate already exists with provided details.'
         })
@@ -124,7 +140,7 @@ export default function CandidateIntakePage() {
         <Card className="w-full max-w-5xl overflow-hidden rounded-xl border border-white/10 bg-[#0E0D17] text-white shadow-2xl">
           <div className="grid md:grid-cols-2">
             {/* Left Side - Information */}
-            <div className="flex flex-col justify-between border-r border-white/5 bg-gradient-to-br from-[#0E0D17] to-[#1A1828] p-8 md:p-10">
+            <div className="flex flex-col justify-between border-r border-white/5 bg-gradient-to-br from-[#050608] to-[#2A1F3D] rounded-xl p-8 md:p-10">
               <div className="space-y-8">
                 <div className="flex items-center">
                   <Image
@@ -324,13 +340,11 @@ export default function CandidateIntakePage() {
                     <Button
                       type="submit"
                       disabled={isPending || isPreparingExam}
-                      className="flex w-full items-center justify-center gap-2"
+                      className="flex w-full items-center justify-center gap-2 cursor-pointer"
                     >
-                      {isPending || isPreparingExam ? (
-                        <>
-                          {isPreparingExam ? 'Preparing your exam...' : 'Creating your session...'}
-                        </>
-                      ) : (
+                      {isPreparingExam && 'Preparing your exam...'}
+                      {isPending && !isPreparingExam && 'Creating your session...'}
+                      {!isPending && !isPreparingExam && (
                         <>
                           Start Assessment
                           <ArrowRight className="h-4 w-4" />

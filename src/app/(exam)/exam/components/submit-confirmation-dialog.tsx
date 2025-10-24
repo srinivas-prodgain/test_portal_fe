@@ -13,13 +13,6 @@ import {
     AlertDialogTitle
 } from '@/components/ui/alert-dialog'
 
-type SubmitConfirmationDialogProps = {
-    open: boolean
-    onOpenChange: (open: boolean) => void
-    onConfirm: () => Promise<void>
-    isSubmitPending: boolean
-}
-
 export const SubmitConfirmationDialog = ({
     open,
     onOpenChange,
@@ -79,4 +72,11 @@ export const SubmitConfirmationDialog = ({
             </AlertDialogContent>
         </AlertDialog>
     )
+}
+
+type SubmitConfirmationDialogProps = {
+    open: boolean
+    onOpenChange: (open: boolean) => void
+    onConfirm: () => Promise<void>
+    isSubmitPending: boolean
 }

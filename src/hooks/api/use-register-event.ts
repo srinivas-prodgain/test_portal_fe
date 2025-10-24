@@ -1,14 +1,18 @@
 import { useMutation } from '@tanstack/react-query'
 
 import type { TSavedAnswerPayload, TViolationType } from '@/types/exam'
+import type { TApiPromise, TMutationOpts } from '@/types/api'
 import { api } from '@/lib/api'
-
-const attemptsEndpoint = '/attempts'
 
 type TRegisterEventPayload = {
   attemptId: string
   type: TViolationType
   answers: TSavedAnswerPayload[]
+}
+
+type TRegisterEventResult = {
+  action: 'warn' | 'terminate'
+  violationCount: number
 }
 
 type TRegisterEventResponse = {
@@ -19,13 +23,13 @@ type TRegisterEventResponse = {
   }
 }
 
-const postViolationEvent = async ({
+const registerEvent = async ({
   attemptId,
   type,
   answers
-}: TRegisterEventPayload): Promise<{ action: 'warn' | 'terminate'; violationCount: number }> => {
+}: TRegisterEventPayload): TApiPromise<TRegisterEventResult> => {
   const response = await api.post<TRegisterEventResponse>(
-    `${attemptsEndpoint}/${attemptId}/event`,
+    `/attempts/${attemptId}/event`,
     {
       type,
       answers: answers.map((answer) => ({
@@ -41,7 +45,12 @@ const postViolationEvent = async ({
   }
 }
 
-export const useRegisterEvent = () =>
-  useMutation({
-    mutationFn: postViolationEvent
+export const useRegisterEvent = (
+  options?: TMutationOpts<TRegisterEventPayload, TRegisterEventResult>
+) => {
+  return useMutation({
+    mutationKey: ['useRegisterEvent'],
+    mutationFn: registerEvent,
+    ...options
   })
+}

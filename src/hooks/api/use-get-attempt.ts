@@ -1,6 +1,13 @@
 import { useQuery } from '@tanstack/react-query'
 
-import type { TAttemptResponse, TAttemptStatus, TAttemptViolation, TSavedAnswerPayload, TViolationType } from '@/types/exam'
+import type {
+  TAttemptResponse,
+  TAttemptStatus,
+  TAttemptViolation,
+  TSavedAnswerPayload,
+  TViolationType
+} from '@/types/exam'
+import type { TApiPromise, TQueryOpts } from '@/types/api'
 import { api } from '@/lib/api'
 
 type TGetAttemptParams = {
@@ -39,7 +46,7 @@ type TGetAttemptResponse = TAttemptResponse & {
 
 const getAttempt = async ({
   candidateId
-}: TGetAttemptParams): Promise<TGetAttemptResponse> => {
+}: TGetAttemptParams): TApiPromise<TGetAttemptResponse> => {
   const response = await api.get<TRawAttemptResponse>('/attempts', {
     params: { candidate_id: candidateId }
   })
@@ -65,11 +72,11 @@ const getAttempt = async ({
 
 export const useGetAttempt = (
   params: TGetAttemptParams,
-  options?: { enabled?: boolean }
+  options?: TQueryOpts<TGetAttemptResponse>
 ) => {
   return useQuery({
     queryKey: ['useGetAttempt', params],
     queryFn: () => getAttempt(params),
-    enabled: options?.enabled ?? true
+    ...options
   })
 }

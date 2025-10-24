@@ -1,13 +1,20 @@
 import { useMutation } from '@tanstack/react-query'
 
+import type { TApiPromise, TMutationOpts } from '@/types/api'
 import { api } from '@/lib/api'
-
-const attemptsEndpoint = '/attempts'
 
 type TUpdateAnswerPayload = {
   attemptId: string
   questionId: string
   answers: string
+}
+
+type TUpdateAnswerResult = {
+  message: string
+  data: {
+    question_id: string
+    answers: string
+  }
 }
 
 type TUpdateAnswerResponse = {
@@ -22,9 +29,9 @@ const updateAnswer = async ({
   attemptId,
   questionId,
   answers
-}: TUpdateAnswerPayload): Promise<TUpdateAnswerResponse> => {
+}: TUpdateAnswerPayload): TApiPromise<TUpdateAnswerResult> => {
   const response = await api.patch<TUpdateAnswerResponse>(
-    `${attemptsEndpoint}/${attemptId}/answer`,
+    `/attempts/${attemptId}/answer`,
     {
       question_id: questionId,
       answers
@@ -33,7 +40,12 @@ const updateAnswer = async ({
   return response.data
 }
 
-export const useUpdateAnswer = () =>
-  useMutation({
-    mutationFn: updateAnswer
+export const useUpdateAnswer = (
+  options?: TMutationOpts<TUpdateAnswerPayload, TUpdateAnswerResult>
+) => {
+  return useMutation({
+    mutationKey: ['useUpdateAnswer'],
+    mutationFn: updateAnswer,
+    ...options
   })
+}

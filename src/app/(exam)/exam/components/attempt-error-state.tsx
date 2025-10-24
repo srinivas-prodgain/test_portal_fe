@@ -11,10 +11,6 @@ import {
   CardTitle
 } from '@/components/ui/card'
 
-type AttemptErrorStateProps = {
-  message: string
-}
-
 export const AttemptErrorState = ({ message }: AttemptErrorStateProps) => (
   <div className="min-h-screen bg-gradient-to-br from-destructive/5 via-background to-destructive/10">
     <div className="flex min-h-screen flex-col items-center justify-center gap-6 px-4 py-6 sm:px-6 sm:py-8 text-center">
@@ -58,3 +54,7 @@ export const AttemptErrorState = ({ message }: AttemptErrorStateProps) => (
     </div>
   </div>
 )
+
+type AttemptErrorStateProps = {
+  message: string
+}

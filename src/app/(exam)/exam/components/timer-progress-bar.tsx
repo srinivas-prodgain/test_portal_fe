@@ -17,10 +17,13 @@ export const TimerProgressBar = ({
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentTime(new Date())
-    }, 100) // Update every 100ms for smoother transitions
+    }, 100)
 
     return () => clearInterval(interval)
   }, [])
+
+  // NOTE: useMemo justified - calculations run every 100ms (10x per second)
+  // Optimizing these calculations prevents unnecessary re-renders of child elements
   const { progressPercentage, colorClass, shouldBlink } = useMemo(() => {
     const start = new Date(startTime).getTime()
     const end = new Date(endTime).getTime()

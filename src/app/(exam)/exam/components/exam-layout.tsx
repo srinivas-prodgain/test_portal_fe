@@ -8,25 +8,6 @@ import { ExamHeader } from './exam-header'
 import { QuestionPanel } from './question-panel'
 import { ViolationWarningDialog } from './violation-warning-dialog'
 
-export type ExamLayoutProps = {
-  timeRemainingLabel: string
-  currentQuestionIndex: number
-  questionsCount: number
-  currentQuestion?: TQuestion
-  currentAnswer: string
-  isAttemptActive: boolean
-  isSubmitPending: boolean
-  attemptStartTime?: string
-  attemptEndTime?: string
-  onAnswerChange: (value: string) => void
-  onMove: (direction: 'next' | 'previous') => void
-  onFinish: () => Promise<void>
-  showWarningDialog: boolean
-  onWarningDialogChange: Dispatch<SetStateAction<boolean>>
-  onWarningAcknowledge: () => Promise<void>
-  violationCount: number
-}
-
 export const ExamLayout = ({
   timeRemainingLabel,
   currentQuestionIndex,
@@ -76,4 +57,23 @@ export const ExamLayout = ({
       />
     </div>
   )
+}
+
+export type ExamLayoutProps = {
+  timeRemainingLabel: string
+  currentQuestionIndex: number
+  questionsCount: number
+  currentQuestion?: TQuestion
+  currentAnswer: string
+  isAttemptActive: boolean
+  isSubmitPending: boolean
+  attemptStartTime?: string
+  attemptEndTime?: string
+  onAnswerChange: (value: string) => void
+  onMove: (direction: 'next' | 'previous') => void
+  onFinish: () => Promise<void>
+  showWarningDialog: boolean
+  onWarningDialogChange: Dispatch<SetStateAction<boolean>>
+  onWarningAcknowledge: () => Promise<void>
+  violationCount: number
 }

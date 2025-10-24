@@ -32,27 +32,6 @@ import {
 
 import { TimerProgressBar } from './timer-progress-bar'
 
-const answerSchema = z.object({
-  answer: z.string()
-})
-
-type AnswerFormValues = z.infer<typeof answerSchema>
-
-type QuestionPanelProps = {
-  currentQuestionIndex: number
-  questionsCount: number
-  currentQuestion?: TQuestion
-  currentAnswer: string
-  isAttemptActive: boolean
-  isSubmitPending: boolean
-  timeRemainingLabel: string
-  attemptStartTime?: string
-  attemptEndTime?: string
-  onAnswerChange: (value: string) => void
-  onMove: (direction: 'next' | 'previous') => void
-  onFinish: () => Promise<void>
-}
-
 export const QuestionPanel = ({
   currentQuestionIndex,
   questionsCount,
@@ -227,3 +206,24 @@ export const QuestionPanel = ({
     </div>
   )
 }
+
+type QuestionPanelProps = {
+  currentQuestionIndex: number
+  questionsCount: number
+  currentQuestion?: TQuestion
+  currentAnswer: string
+  isAttemptActive: boolean
+  isSubmitPending: boolean
+  timeRemainingLabel: string
+  attemptStartTime?: string
+  attemptEndTime?: string
+  onAnswerChange: (value: string) => void
+  onMove: (direction: 'next' | 'previous') => void
+  onFinish: () => Promise<void>
+}
+
+const answerSchema = z.object({
+  answer: z.string()
+})
+
+type AnswerFormValues = z.infer<typeof answerSchema>

@@ -11,10 +11,6 @@ import {
   CardTitle
 } from '@/components/ui/card'
 
-type MissingCandidateNoticeProps = {
-  onNavigate: () => void
-}
-
 export const MissingCandidateNotice = ({
   onNavigate
 }: MissingCandidateNoticeProps) => (
@@ -34,10 +30,10 @@ export const MissingCandidateNotice = ({
             </CardDescription>
           </div>
         </CardHeader>
-        
+
         <CardFooter className="flex flex-col gap-3 p-6 pt-0">
-          <Button 
-            onClick={onNavigate} 
+          <Button
+            onClick={onNavigate}
             className="w-full h-10 gap-2"
           >
             Complete Intake Form
@@ -45,7 +41,7 @@ export const MissingCandidateNotice = ({
           </Button>
         </CardFooter>
       </Card>
-      
+
       <div className="flex items-center gap-2 text-sm text-muted-foreground">
         <AlertCircle className="h-4 w-4" />
         <span>This step is required to start your assessment</span>
@@ -53,3 +49,7 @@ export const MissingCandidateNotice = ({
     </div>
   </div>
 )
+
+type MissingCandidateNoticeProps = {
+  onNavigate: () => void
+}

@@ -1,60 +1,55 @@
 'use client'
 
-import {
-  Suspense,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState
-} from 'react'
+import { Suspense, useCallback, useEffect, useRef, useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 
-import type {
-  TAttemptResponse,
-  TAttemptStatus,
-  TViolationType
-} from '@/types/exam'
+import type { TAttemptResponse, TAttemptStatus, TViolationType } from '@/types/exam'
 import {
   useGetAttempt,
   useGetQuestions,
-  useRegisterEvent,
-  useSubmitAttempt,
-  useUpdateAnswer
+  useSubmitAttempt
 } from '@/hooks/api'
 import { useDevtoolsGuard } from '@/hooks/use-devtools-guard'
 import { useDisableCopyPaste } from '@/hooks/use-disable-copy-paste'
 import { useFullscreenGuard } from '@/hooks/use-fullscreen-guard'
+import { useExamTimer } from '@/hooks/use-exam-timer'
+import { useExamViolations } from '@/hooks/use-exam-violations'
+import { useExamSecurityListeners } from '@/hooks/use-exam-security-listeners'
+import { useExamAnswers } from '@/hooks/use-exam-answers'
 
-import { ExamLayout, MissingCandidateNotice, SubmitConfirmationDialog } from './components'
+import {
+  AttemptErrorState,
+  ExamLayout,
+  ExamLoadingState,
+  MissingCandidateNotice,
+  SubmitConfirmationDialog
+} from './components'
 
 export const ExamPageContent = () => {
   const router = useRouter()
   const candidateId = useSearchParams().get('candidate_id')
 
-  // API Hooks
   const attemptQuery = useGetAttempt(
     { candidateId: candidateId ?? '' },
     { enabled: Boolean(candidateId) }
   )
   const questionsQuery = useGetQuestions({ enabled: Boolean(candidateId) })
-  const { mutateAsync: submitAttempt, isPending: isSubmitPending } =
-    useSubmitAttempt()
-  const { mutateAsync: registerEvent } = useRegisterEvent()
-  const { mutateAsync: updateAnswer } = useUpdateAnswer()
+  const { mutateAsync: submitAttempt, isPending: isSubmitPending } = useSubmitAttempt()
 
-  // State
   const [attemptInfo, setAttempt] = useState<TAttemptResponse | null>(null)
   const [attemptStatus, setAttemptStatus] = useState<TAttemptStatus>('running')
-  const [currentAnswer, setCurrentAnswer] = useState('')
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
-  const [showWarningDialog, setShowWarningDialog] = useState(false)
   const [showSubmitDialog, setShowSubmitDialog] = useState(false)
-  const [isProcessingViolation, setIsProcessingViolation] = useState(false)
-  const [answersCache, setAnswersCache] = useState<Record<string, string>>({})
-  const [timeRemainingLabel, setTimeRemainingLabel] = useState('--:--')
 
-  // Refs
+  const questions = questionsQuery.data ?? []
+  const isAttemptActive = attemptStatus === 'running'
+  const currentQuestion = questions[currentQuestionIndex]
+
+  const { answersCache, setAnswersCache, currentAnswer, setCurrentAnswer } = useExamAnswers({
+    attemptInfo,
+    currentQuestion
+  })
+
   const stateRefs = useRef({
     attemptInfo,
     attemptStatus,
@@ -63,15 +58,6 @@ export const ExamPageContent = () => {
     answersCache
   })
 
-  // Computed Values
-  const questions = useMemo(
-    () => questionsQuery.data ?? [],
-    [questionsQuery.data]
-  )
-  const isAttemptActive = attemptStatus === 'running'
-  const currentQuestion = questions[currentQuestionIndex]
-
-  // Keep refs in sync
   useEffect(() => {
     stateRefs.current = {
       attemptInfo,
@@ -82,140 +68,81 @@ export const ExamPageContent = () => {
     }
   }, [attemptInfo, attemptStatus, currentQuestionIndex, currentAnswer, answersCache])
 
-  // Initialize answers cache from server data
-  useEffect(() => {
-    if (!attemptInfo?.answers) return
-    const cache: Record<string, string> = {}
-    attemptInfo.answers.forEach((answer) => {
-      cache[answer.questionId] = answer.answers
-    })
-    setAnswersCache(cache)
-  }, [attemptInfo?.answers])
-
-  // Submit Attempt
-  const handleSubmitAttempt = useCallback(async (isAutoSubmit = false): Promise<void> => {
-    const { attemptInfo, attemptStatus, currentQuestionIndex, currentAnswer, answersCache } =
-      stateRefs.current
-    const attemptId = attemptInfo?.attemptId
-
-    if (
-      !attemptId ||
-      attemptStatus !== 'running' ||
-      isSubmitPending
-    ) {
-      return
-    }
-
-    // Prepare all answers from cache including current answer
+  const prepareAnswersForSubmission = useCallback(() => {
+    const { currentQuestionIndex, currentAnswer, answersCache } = stateRefs.current
     const currentQ = questions[currentQuestionIndex]
     const allAnswers = { ...answersCache }
 
-    // Include current answer in the cache
     if (currentQ && currentAnswer.trim()) {
       allAnswers[currentQ.questionId] = currentAnswer
     }
 
-    // Convert cached answers to the format expected by API
-    const answersToSubmit = Object.entries(allAnswers)
-      .filter(([, answer]) => answer.trim()) // Only include non-empty answers
+    return Object.entries(allAnswers)
+      .filter(([, answer]) => answer.trim())
       .map(([questionId, answer]) => ({
         questionId,
         answers: answer
       }))
+  }, [questions])
 
-    try {
-      await submitAttempt({ attemptId, answers: answersToSubmit, isAutoSubmit })
-      const finalStatus = isAutoSubmit ? 'auto_submitted' : 'submitted'
-      setAttemptStatus(finalStatus)
-      router.replace(`/submit?status=${finalStatus}`)
-    } catch (error) {
-      console.error('Submission failed:', error)
-    }
-  }, [
-    isSubmitPending,
-    questions,
-    submitAttempt,
-    router
-  ])
+  const handleSubmitAttempt = useCallback(
+    async (isAutoSubmit = false): Promise<void> => {
+      const { attemptInfo, attemptStatus } = stateRefs.current
+      const attemptId = attemptInfo?.attemptId
 
-  // Handle Violations
-  const handleViolation = useCallback(
-    async (type: TViolationType): Promise<void> => {
-      const { attemptInfo, attemptStatus, currentQuestionIndex, currentAnswer, answersCache } = stateRefs.current
+      const canSubmit = attemptId && attemptStatus === 'running' && !isSubmitPending
 
-      console.log('[VIOLATION] Type:', type, 'Status:', attemptStatus, 'Processing:', isProcessingViolation)
-
-      if (
-        !attemptInfo?.attemptId ||
-        attemptStatus !== 'running' ||
-        isProcessingViolation
-      ) {
-        console.log('[VIOLATION] Skipped - Guard condition failed')
+      if (!canSubmit) {
         return
       }
 
-      console.log('[VIOLATION] Registering violation:', type)
-      setIsProcessingViolation(true)
+      const answersToSubmit = prepareAnswersForSubmission()
+      const finalStatus = isAutoSubmit ? 'auto_submitted' : 'submitted'
 
-      try {
-        // Prepare all answers from cache including current answer
-        const currentQ = questions[currentQuestionIndex]
-        const allAnswers = { ...answersCache }
-
-        // Include current answer in the cache
-        if (currentQ && currentAnswer.trim()) {
-          allAnswers[currentQ.questionId] = currentAnswer
-        }
-
-        // Convert cached answers to the format expected by API
-        const answersToSend = Object.entries(allAnswers)
-          .filter(([, answer]) => answer.trim()) // Only include non-empty answers
-          .map(([questionId, answer]) => ({
-            questionId,
-            answers: answer
-          }))
-
-        const response = await registerEvent({
-          attemptId: attemptInfo.attemptId,
-          type,
-          answers: answersToSend
-        })
-
-        console.log('[VIOLATION] Response:', response)
-
-        // Update violation count in attempt info
-        setAttempt((prev) =>
-          prev ? { ...prev, violationCount: response.violationCount } : prev
-        )
-
-        if (response.action === 'warn') {
-          console.log('[VIOLATION] Showing warning dialog')
-          setShowWarningDialog(true)
-        } else if (response.action === 'terminate') {
-          console.log('[VIOLATION] Terminating attempt')
-          setAttemptStatus('terminated')
-          router.replace('/submit?status=terminated')
-        }
-      } catch (error) {
-        console.error('[VIOLATION] Failed to register violation:', error)
-      } finally {
-        setTimeout(() => setIsProcessingViolation(false), 1000)
-      }
+      await submitAttempt({ attemptId, answers: answersToSubmit, isAutoSubmit })
+      setAttemptStatus(finalStatus)
+      router.replace(`/submit?status=${finalStatus}`)
     },
-    [
-      isProcessingViolation,
-      questions,
-      registerEvent,
-      router
-    ]
+    [isSubmitPending, prepareAnswersForSubmission, submitAttempt, router]
   )
 
-  // Memoized fullscreen violation handler
+  const handleAttemptTerminated = useCallback(() => {
+    setAttemptStatus('terminated')
+  }, [])
+
+  const handleViolationUpdate = useCallback((violationCount: number) => {
+    setAttempt((prev) => (prev ? { ...prev, violationCount } : prev))
+  }, [])
+
+  const {
+    isProcessingViolation,
+    showWarningDialog,
+    setShowWarningDialog,
+    handleViolation
+  } = useExamViolations({
+    attemptInfo,
+    attemptStatus,
+    isAttemptActive,
+    questions,
+    currentQuestionIndex,
+    currentAnswer,
+    answersCache,
+    onAttemptUpdate: handleViolationUpdate,
+    onAttemptTerminated: handleAttemptTerminated
+  })
+
   const handleFullscreenViolation = useCallback(() => {
-    handleViolation('fullscreen')
+    void handleViolation('fullscreen', stateRefs.current)
   }, [handleViolation])
 
-  // Security Hooks
+  const timeRemainingLabel = useExamTimer({
+    endsAt: attemptInfo?.endsAt,
+    isActive: isAttemptActive,
+    onTimeExpired: async () => {
+      await handleSubmitAttempt(true)
+    }
+  })
+
   useDisableCopyPaste({ isActive: isAttemptActive })
   useDevtoolsGuard({ isActive: isAttemptActive })
   const { requestFullscreen } = useFullscreenGuard({
@@ -223,205 +150,111 @@ export const ExamPageContent = () => {
     onFullscreenExit: handleFullscreenViolation
   })
 
-  // Request fullscreen when exam starts
-  useEffect(() => {
-    if (attemptInfo && isAttemptActive) {
-      void requestFullscreen()
-    }
-  }, [attemptInfo, isAttemptActive, requestFullscreen])
+  const handleViolationEvent = useCallback(
+    async (type: TViolationType) => {
+      await handleViolation(type, stateRefs.current)
+    },
+    [handleViolation]
+  )
 
-  const handleWarningAcknowledge = async (): Promise<void> => {
+  useExamSecurityListeners({
+    isActive: isAttemptActive,
+    onViolation: handleViolationEvent,
+    onTerminate: handleAttemptTerminated
+  })
+
+  useEffect(() => {
+    const shouldEnterFullscreen = attemptInfo && isAttemptActive && !document.fullscreenElement
+
+    if (shouldEnterFullscreen) {
+      void document.documentElement.requestFullscreen().catch(() => {
+        // Fullscreen request failed silently
+      })
+    }
+  }, [attemptInfo, isAttemptActive])
+
+  const handleWarningAcknowledge = useCallback(async (): Promise<void> => {
     setShowWarningDialog(false)
     await requestFullscreen()
-  }
+  }, [requestFullscreen, setShowWarningDialog])
 
-  // Timer countdown
-  useEffect(() => {
-    if (!attemptInfo?.endsAt || !isAttemptActive) {
-      setTimeRemainingLabel('00:00')
-      return
-    }
-
-    const updateTimer = () => {
-      const now = new Date().getTime()
-      const endTime = new Date(attemptInfo.endsAt).getTime()
-      const timeLeft = Math.max(0, endTime - now)
-
-      if (timeLeft === 0) {
-        setTimeRemainingLabel('00:00')
-        // Auto-submit when time runs out
-        void handleSubmitAttempt(true)
-        return
-      }
-
-      const minutes = Math.floor(timeLeft / 60000)
-      const seconds = Math.floor((timeLeft % 60000) / 1000)
-      setTimeRemainingLabel(`${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`)
-    }
-
-    updateTimer()
-    const intervalId = setInterval(updateTimer, 1000)
-
-    return () => clearInterval(intervalId)
-  }, [attemptInfo?.endsAt, isAttemptActive, handleSubmitAttempt])
-
-  // Load existing attempt
   useEffect(() => {
     const existingAttempt = attemptQuery.data
     if (!existingAttempt) return
 
     setAttempt(existingAttempt)
 
-    if (existingAttempt.status === 'running') {
-      if (stateRefs.current.attemptStatus !== 'running')
-        setAttemptStatus('running')
-    } else if (existingAttempt.status) {
+    const shouldUpdateStatus =
+      existingAttempt.status === 'running'
+        ? stateRefs.current.attemptStatus !== 'running'
+        : stateRefs.current.attemptStatus !== existingAttempt.status
+
+    if (shouldUpdateStatus) {
       const status = existingAttempt.status as TAttemptStatus
-      if (stateRefs.current.attemptStatus !== status)
-        setAttemptStatus(status)
-      router.replace(`/submit?status=${status}`)
+      setAttemptStatus(status)
+
+      if (existingAttempt.status !== 'running') {
+        router.replace(`/submit?status=${status}`)
+      }
     }
   }, [attemptQuery.data, router])
 
-  // Security Event Listeners
-  useEffect(() => {
-    if (!isAttemptActive) return
+  const handleAnswerChange = useCallback(
+    (value: string): void => {
+      const canChangeAnswer = isAttemptActive && currentQuestion && attemptInfo
 
-    const handlers = {
-      visibilitychange: () => document.hidden && handleViolation('window-blur'),
-      blur: () => handleViolation('window-blur'),
-      copy: (e: Event) => {
-        e.preventDefault()
-        // Only prevent copy, don't track as violation
-      },
-      paste: (e: Event) => {
-        e.preventDefault()
-        // Only prevent paste, don't track as violation
-      },
-      contextmenu: (e: Event) => e.preventDefault()
-    }
+      if (!canChangeAnswer) return
 
-    document.addEventListener('visibilitychange', handlers.visibilitychange)
-    window.addEventListener('blur', handlers.blur)
-    document.addEventListener('copy', handlers.copy)
-    document.addEventListener('paste', handlers.paste)
-    document.addEventListener('contextmenu', handlers.contextmenu)
+      setCurrentAnswer(value)
+      setAnswersCache((prev) => ({
+        ...prev,
+        [currentQuestion.questionId]: value
+      }))
+    },
+    [isAttemptActive, currentQuestion, attemptInfo, setCurrentAnswer, setAnswersCache]
+  )
 
-    return () => {
-      document.removeEventListener(
-        'visibilitychange',
-        handlers.visibilitychange
+  const handleMove = useCallback(
+    async (direction: 'next' | 'previous'): Promise<void> => {
+      const canMove = currentQuestion && isAttemptActive && attemptInfo
+
+      if (!canMove) return
+
+      setCurrentQuestionIndex((prev) =>
+        direction === 'next'
+          ? Math.min(prev + 1, Math.max(questions.length - 1, 0))
+          : Math.max(prev - 1, 0)
       )
-      window.removeEventListener('blur', handlers.blur)
-      document.removeEventListener('copy', handlers.copy)
-      document.removeEventListener('paste', handlers.paste)
-      document.removeEventListener('contextmenu', handlers.contextmenu)
-    }
-  }, [isAttemptActive, handleViolation])
+    },
+    [currentQuestion, isAttemptActive, attemptInfo, questions.length]
+  )
 
-  useEffect(() => {
-    if (!isAttemptActive) return
+  const handleFinishAttemptClick = useCallback(async (): Promise<void> => {
+    const canFinish = isAttemptActive && attemptInfo
 
-    const exitMessage =
-      'Refreshing or closing this tab will terminate your exam attempt. Do you want to exit?'
+    if (!canFinish) return
 
-    const handleBeforeUnload = (event: BeforeUnloadEvent) => {
-      event.preventDefault()
-      event.returnValue = exitMessage
-    }
-
-    const handleRefreshShortcuts = (event: KeyboardEvent) => {
-      const key = event.key.toLowerCase()
-
-      // Disable ESC key to prevent easy fullscreen exit
-      if (event.key === 'Escape') {
-        event.preventDefault()
-        return
-      }
-
-      const isRefreshKey =
-        event.key === 'F5' || (key === 'r' && (event.metaKey || event.ctrlKey))
-      if (!isRefreshKey) return
-
-      event.preventDefault()
-      const shouldExit = window.confirm(
-        'Do you want to exit the exam? This action will terminate your attempt.'
-      )
-      if (shouldExit) {
-        setAttemptStatus('terminated')
-        router.replace('/submit?status=terminated')
-      }
-    }
-
-    window.addEventListener('beforeunload', handleBeforeUnload)
-    window.addEventListener('keydown', handleRefreshShortcuts)
-
-    return () => {
-      window.removeEventListener('beforeunload', handleBeforeUnload)
-      window.removeEventListener('keydown', handleRefreshShortcuts)
-    }
-  }, [isAttemptActive, router])
-
-  // Load answer when question changes
-  useEffect(() => {
-    if (!currentQuestion) {
-      setCurrentAnswer('')
-      return
-    }
-    setCurrentAnswer(answersCache[currentQuestion.questionId] ?? '')
-  }, [currentQuestion, answersCache])
-
-  // Handlers
-  const handleAnswerChange = (value: string): void => {
-    if (
-      !isAttemptActive ||
-      !currentQuestion ||
-      !attemptInfo
-    )
-      return
-
-    setCurrentAnswer(value)
-    setAnswersCache((prev) => ({
-      ...prev,
-      [currentQuestion.questionId]: value
-    }))
-  }
-
-  const handleMove = async (direction: 'next' | 'previous'): Promise<void> => {
-    if (
-      !currentQuestion ||
-      !isAttemptActive ||
-      !attemptInfo
-    )
-      return
-
-    // No API call - just navigate between questions
-    setCurrentQuestionIndex((prev) =>
-      direction === 'next'
-        ? Math.min(prev + 1, Math.max(questions.length - 1, 0))
-        : Math.max(prev - 1, 0)
-    )
-  }
-
-  const handleFinishAttemptClick = async (): Promise<void> => {
-    if (
-      !isAttemptActive ||
-      !attemptInfo
-    )
-      return
-
-    // Show confirmation dialog instead of directly submitting
     setShowSubmitDialog(true)
-  }
+  }, [isAttemptActive, attemptInfo])
 
-  const handleSubmitConfirmation = async (): Promise<void> => {
-    // All answers will be saved in bulk during handleSubmitAttempt
+  const handleSubmitConfirmation = useCallback(async (): Promise<void> => {
     await handleSubmitAttempt()
+  }, [handleSubmitAttempt])
+
+  if (!candidateId) {
+    return <MissingCandidateNotice onNavigate={() => router.push('/form1')} />
   }
 
-  // Render guards
-  if (!candidateId)
-    return <MissingCandidateNotice onNavigate={() => router.push('/form1')} />
+  const isLoadingData = attemptQuery.isLoading || questionsQuery.isLoading
+  const hasError = attemptQuery.isError || questionsQuery.isError
+
+  if (isLoadingData) {
+    return <ExamLoadingState />
+  }
+
+  if (hasError) {
+    return <AttemptErrorState message="Failed to load exam. Please refresh the page." />
+  }
 
   return (
     <>

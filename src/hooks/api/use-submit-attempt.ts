@@ -1,9 +1,8 @@
 import { useMutation } from '@tanstack/react-query'
 
 import type { TSavedAnswerPayload } from '@/types/exam'
+import type { TApiPromise, TMutationOpts } from '@/types/api'
 import { api } from '@/lib/api'
-
-const attemptsEndpoint = '/attempts'
 
 type TSubmitAttemptPayload = {
   attemptId: string
@@ -19,8 +18,8 @@ const submitAttempt = async ({
   attemptId,
   answers,
   isAutoSubmit = false
-}: TSubmitAttemptPayload): Promise<void> => {
-  await api.post<TSubmitAttemptResponse>(`${attemptsEndpoint}/${attemptId}/submit`, {
+}: TSubmitAttemptPayload): TApiPromise<void> => {
+  await api.post<TSubmitAttemptResponse>(`/attempts/${attemptId}/submit`, {
     answers: answers.map((answer) => ({
       question_id: answer.questionId,
       answers: answer.answers
@@ -29,7 +28,12 @@ const submitAttempt = async ({
   })
 }
 
-export const useSubmitAttempt = () =>
-  useMutation({
-    mutationFn: submitAttempt
+export const useSubmitAttempt = (
+  options?: TMutationOpts<TSubmitAttemptPayload, void>
+) => {
+  return useMutation({
+    mutationKey: ['useSubmitAttempt'],
+    mutationFn: submitAttempt,
+    ...options
   })
+}

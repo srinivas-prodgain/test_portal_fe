@@ -1,6 +1,5 @@
 'use client'
 
-import { useCallback } from 'react'
 import type { Dispatch, SetStateAction } from 'react'
 import { AlertTriangle, ShieldCheck } from 'lucide-react'
 
@@ -28,9 +27,9 @@ export const ViolationWarningDialog = ({
   onAcknowledge,
   violationCount
 }: ViolationWarningDialogProps) => {
-  const handleAcknowledge = useCallback(() => {
+  const handleAcknowledge = () => {
     void onAcknowledge()
-  }, [onAcknowledge])
+  }
 
   const remainingWarnings = MAX_WARNINGS_ALLOWED - violationCount
 
